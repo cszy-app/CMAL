@@ -64,7 +64,6 @@ class ModrinthClient {
                     gameVersions = h.optJSONArray("versions")?.let { ja ->
                         (0 until ja.length()).map { ja.optString(it) }
                     } ?: emptyList(),
-                    downloadCount = h.optLong("downloads", 0),
                     source = "modrinth",
                     webUrl = "https://modrinth.com/${h.optString("project_type", "mod")}/${h.optString("slug", "")}"
                 )
@@ -78,11 +77,10 @@ class ModrinthClient {
      * @return 若找不到可用版本返回 null
      */
     fun getVersion(item: MarketItem): MarketItem? {
-        val body = requestBody("$BASE/project/${item.id}/version")
-        val versions = body.optJSONArray("version") ?: body // /project/{id}/version 返回数组
-        if (versions is JSONArray && versions.length() > 0) {
-            val v = versions.optJSONObject(0)
-            val files = v?.optJSONArray("files") ?: return item
+        val body = requestArray("$BASE/project/${item.id}/version")
+        if (body.length() > 0) {
+            val v = body.optJSONObject(0)
+            val files = v?.optJSONArray("files") ?: return item.copy(downloadUrl = null)
             if (files.length() > 0) {
                 val file = files.optJSONObject(0)
                 return item.copy(
@@ -109,6 +107,20 @@ class ModrinthClient {
                 throw IOException("modrinth_http_${resp.code}")
             }
             return JSONObject(resp.body?.string() ?: "{}")
+        }
+    }
+
+    private fun requestArray(url: String): JSONArray {
+        val request = Request.Builder()
+            .url(url)
+            .header("User-Agent", "CMAL/0.1 (contact: cmal@example.com)")
+            .header("Accept", "application/json")
+            .build()
+        client.newCall(request).execute().use { resp ->
+            if (!resp.isSuccessful) {
+                throw IOException("modrinth_http_${resp.code}")
+            }
+            return JSONArray(resp.body?.string() ?: "[]")
         }
     }
 
