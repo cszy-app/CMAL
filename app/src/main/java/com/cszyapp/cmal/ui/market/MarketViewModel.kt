@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.cszyapp.cmal.data.AppContainer
 import com.cszyapp.cmal.data.download.DownloadState
 import com.cszyapp.cmal.data.market.MarketItem
-import com.cszyapp.cmal.data.market.ModrinthClient
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -96,13 +95,4 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
     fun clearError() {
         error = null
     }
-
-    /** 可用资源类型 */
-    fun typeOptions(): List<Pair<String, String>> = listOf(
-        "all" to "全部",
-        "mod" to ModrinthClient.typeName("mod"),
-        "resourcepack" to ModrinthClient.typeName("resourcepack"),
-        "shader" to ModrinthClient.typeName("shader"),
-        "datapack" to ModrinthClient.typeName("datapack")
-    )
 }

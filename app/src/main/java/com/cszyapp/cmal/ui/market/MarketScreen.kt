@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -41,7 +40,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.cszyapp.cmal.R
@@ -50,7 +48,6 @@ import com.cszyapp.cmal.data.download.DownloadManager
 import com.cszyapp.cmal.data.market.MarketItem
 import com.cszyapp.cmal.ui.navigation.SimpleFactory
 import kotlinx.coroutines.launch
-import java.io.File
 
 /** 资源市场页：搜索并下载第三方资源 */
 @Composable
@@ -94,7 +91,9 @@ fun MarketScreen() {
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            vm.typeOptions().forEach { (type, label) ->
+            val types = listOf("all", "mod", "resourcepack", "shader", "datapack")
+            types.forEach { type ->
+                val label = if (type == "all") stringResource(R.string.market_type_all) else ModrinthTypeName(type)
                 FilterChip(
                     selected = vm.selectedType == type,
                     onClick = { vm.setType(type) },
@@ -172,8 +171,7 @@ private fun MarketItemCard(
                 AsyncImage(
                     model = item.iconUrl,
                     contentDescription = null,
-                    modifier = Modifier.size(56.dp),
-                    error = coil.compose.AsyncImagePainter.DefaultPainter
+                    modifier = Modifier.size(56.dp)
                 )
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {

@@ -130,4 +130,5 @@
     <string name="market_type_resourcepack">资源包</string>
     <string name="market_type_shader">光影</string>
     <string name="market_type_datapack">数据包</string>
+    <string name="market_type_all">全部</string>
 </resources>

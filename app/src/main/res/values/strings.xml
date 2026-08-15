@@ -130,4 +130,5 @@
     <string name="market_type_resourcepack">Resource pack</string>
     <string name="market_type_shader">Shader</string>
     <string name="market_type_datapack">Data pack</string>
+    <string name="market_type_all">All</string>
 </resources>
