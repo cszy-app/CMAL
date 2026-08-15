@@ -18,7 +18,7 @@ data class AppUpdateInfo(
     val changelog: String
 )
 
-class UpdateChecker(private val context: Context) {
+class UpdateChecker(private val context: Context?) {
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
@@ -34,6 +34,7 @@ class UpdateChecker(private val context: Context) {
     /** 当前应用版本号 */
     fun currentVersion(): String =
         try {
+            if (context == null) return "0.1"
             context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "0.1"
         } catch (_: PackageManager.NameNotFoundException) {
             "0.1"
