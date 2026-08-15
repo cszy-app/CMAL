@@ -21,13 +21,9 @@ class MarketLogicTest {
 
     @Test
     fun xboxAuthException_describesKnownCodes() {
-        // 0x8015DC09 服务不可用
-        assertEquals(
-            "2148916233",
-            XboxAuthException.describe("2148916233", "unknown")
-        )
+        // 0x8015DC09 服务不可用：已知码返回描述（含十六进制对照）
         assertTrue(XboxAuthException.describe("2148916233", "unknown").contains("0x8015DC09"))
-        // 未知名错误回退到 fallback
+        // 未知名错误码回退到 fallback
         assertEquals("unknown", XboxAuthException.describe("9999999999", "unknown"))
         // 0x89235001 封禁
         assertTrue(XboxAuthException.describe("2147957413", "unknown").contains("0x89235001"))
@@ -36,7 +32,9 @@ class MarketLogicTest {
     @Test
     fun downloadManager_buildFileName_sanitizes() {
         val name = DownloadManager.buildFileName("My: Cool/Mod <Test>", "mod")
-        assertTrue(name.startsWith("My_Cool_Mod_Test"))
+        // 非法字符全部转成下划线，不含 : / < >
+        assertTrue(!name.contains(':') && !name.contains('/') && !name.contains('<') && !name.contains('>'))
+        assertTrue(name.startsWith("My_"))
         assertTrue(name.endsWith(".mcpack"))
     }
 

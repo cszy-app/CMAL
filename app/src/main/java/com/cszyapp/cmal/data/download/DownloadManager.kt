@@ -111,11 +111,18 @@ class DownloadManager(private val context: Context) {
 
     /** 清空已完成且未在下载中的文件 */
     fun clearFinishedDownloads() {
-        val finishedIds = _tasks.value.values.filter { it.done }.map { it.item.id }.toSet()
+        val finishedFiles = _tasks.value.values
+            .filter { it.done && it.targetFile != null }
+            .mapNotNull { it.targetFile }
+            .toSet()
         _tasks.update { m ->
-            m.filterKeys { it !in finishedIds }
+            m.filterValues { !it.done }
         }
-        downloadDir.listFiles()?.forEach { f -> f.delete() }
+        // 只删已完成任务的文件，保留进行中的
+        val activeFiles = _tasks.value.values.mapNotNull { it.targetFile }.toSet()
+        finishedFiles.forEach { f ->
+            if (f !in activeFiles) f.delete()
+        }
     }
 
     private suspend fun downloadOne(item: MarketItem) {

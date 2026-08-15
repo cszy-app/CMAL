@@ -37,7 +37,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     fun launchDefault() {
         val def = instances.firstOrNull { it.isDefault }
         val target = def ?: instances.firstOrNull()
-        if (target != null && container.systemHelper.isMcInstalled()) {
+        if (target != null && container.systemHelper.isPackageInstalled(target.packageName)) {
             if (!container.systemHelper.launchPackage(target.packageName)) {
                 message = "launch_failed"
             }

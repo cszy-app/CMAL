@@ -19,9 +19,12 @@ class SystemHelper(private val context: Context) {
     }
 
     /** 是否已安装 Minecraft Bedrock */
-    fun isMcInstalled(): Boolean =
+    fun isMcInstalled(): Boolean = isPackageInstalled(MC_PACKAGE)
+
+    /** 指定包是否已安装 */
+    fun isPackageInstalled(packageName: String): Boolean =
         try {
-            context.packageManager.getPackageInfo(MC_PACKAGE, 0)
+            context.packageManager.getPackageInfo(packageName, 0)
             true
         } catch (_: PackageManager.NameNotFoundException) {
             false

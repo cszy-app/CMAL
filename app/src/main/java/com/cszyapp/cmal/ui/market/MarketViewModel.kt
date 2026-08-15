@@ -76,8 +76,12 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    /** 下载并导入到 Minecraft */
+    /** 下载并导入到 Minecraft（仅 Modrinth 直连源；McFun 走网盘浏览器） */
     fun downloadAndInstall(item: MarketItem) {
+        if (item.source == "mcfun") {
+            error = "use_web_download"
+            return
+        }
         viewModelScope.launch {
             error = null
             try {
