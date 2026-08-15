@@ -131,4 +131,7 @@
     <string name="market_type_shader">光影</string>
     <string name="market_type_datapack">数据包</string>
     <string name="market_type_all">全部</string>
+    <string name="market_type_world">世界</string>
+    <string name="market_type_modpack">整合包</string>
+    <string name="market_open_web">去网盘下载</string>
 </resources>

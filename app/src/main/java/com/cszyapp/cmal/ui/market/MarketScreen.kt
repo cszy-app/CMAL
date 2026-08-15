@@ -70,6 +70,17 @@ fun MarketScreen() {
         }
     }
 
+    fun openWeb(item: MarketItem) {
+        val url = item.webUrl ?: return
+        try {
+            context.startActivity(
+                android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+            )
+        } catch (e: Exception) {
+            // 无浏览器时忽略
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         // 搜索框
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -142,9 +153,11 @@ fun MarketScreen() {
                         MarketItemCard(
                             item = item,
                             task = vm.tasks[item.id],
+                            isWebSource = item.source == "mcfun",
                             onDownload = { vm.downloadAndInstall(item) },
                             onCancel = { vm.cancelDownload(item.id) },
-                            onImport = { importDownloaded(item) }
+                            onImport = { importDownloaded(item) },
+                            onOpenWeb = { openWeb(item) }
                         )
                     }
                 }
@@ -157,9 +170,11 @@ fun MarketScreen() {
 private fun MarketItemCard(
     item: MarketItem,
     task: com.cszyapp.cmal.data.download.DownloadState?,
+    isWebSource: Boolean,
     onDownload: () -> Unit,
     onCancel: () -> Unit,
-    onImport: () -> Unit
+    onImport: () -> Unit,
+    onOpenWeb: () -> Unit
 ) {
     val running = task?.running == true
     val done = task?.done == true
@@ -239,10 +254,14 @@ private fun MarketItemCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.weight(1f))
-                    Button(onClick = onDownload, contentPadding = PaddingValues(horizontal = 12.dp)) {
-                        Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.download))
+                    Button(onClick = if (isWebSource) onOpenWeb else onDownload, contentPadding = PaddingValues(horizontal = 12.dp)) {
+                        if (isWebSource) {
+                            Text(stringResource(R.string.market_open_web))
+                        } else {
+                            Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text(stringResource(R.string.download))
+                        }
                     }
                 }
             }
@@ -256,5 +275,7 @@ private fun ModrinthTypeName(type: String): String = when (type) {
     "resourcepack" -> stringResource(R.string.market_type_resourcepack)
     "shader" -> stringResource(R.string.market_type_shader)
     "datapack" -> stringResource(R.string.market_type_datapack)
+    "world" -> stringResource(R.string.market_type_world)
+    "modpack" -> stringResource(R.string.market_type_modpack)
     else -> type
 }

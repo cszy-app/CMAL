@@ -131,4 +131,7 @@
     <string name="market_type_shader">Shader</string>
     <string name="market_type_datapack">Data pack</string>
     <string name="market_type_all">All</string>
+    <string name="market_type_world">World</string>
+    <string name="market_type_modpack">Mod pack</string>
+    <string name="market_open_web">Open in browser</string>
 </resources>

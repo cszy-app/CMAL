@@ -5,43 +5,42 @@ import kotlinx.coroutines.withContext
 
 /**
  * 资源市场仓库：聚合多个来源
- * - Modrinth：官方 API，无需 key
- * - MineBBS：预留（后续抓取解析）
+ * - Modrinth：官方 API，无需 key，支持搜索 + 直连下载
+ * - McFun（原 mcshuo）：中文资源站，JSON-LD 解析，按类型浏览，下载走网盘
  */
 class MarketRepository(
     private val modrinth: ModrinthClient,
-    private val mineBbs: MineBbsClient = MineBbsClient()
+    private val mcFun: McFunClient = McFunClient()
 ) {
 
-    /** 搜索资源（Modrinth + MineBBS），阻塞式，需在 IO 线程 */
+    /** 搜索资源（Modrinth）。McFun 不支持搜索，仅按类型浏览。 */
     suspend fun search(
         query: String,
         type: String?,
         offset: Int,
         pageSize: Int = 20
     ): List<MarketItem> = withContext(Dispatchers.IO) {
-        // 先取 Modrinth 结果；MineBBS 解析失败时静默降级
-        val modrinthHits = try {
+        try {
             modrinth.search(query, type, offset, pageSize)
         } catch (e: Exception) {
             emptyList()
         }
-        if (offset == 0 && modrinthHits.isEmpty()) {
-            // 仅在首页无结果时尝试 MineBBS，避免重复请求
+    }
+
+    /** 按类型浏览（McFun 中文资源，网盘下载）。用于"发现"页。 */
+    suspend fun browse(type: String, offset: Int, pageSize: Int = 20): List<MarketItem> =
+        withContext(Dispatchers.IO) {
             try {
-                mineBbs.search(query, type, offset, pageSize)
+                mcFun.browse(type, offset, pageSize)
             } catch (e: Exception) {
                 emptyList()
             }
-        } else {
-            modrinthHits
         }
-    }
 
-    /** 获取具体下载版本信息（Modrinth 项目版本） */
+    /** 获取具体下载版本信息 */
     suspend fun resolveDownload(item: MarketItem): MarketItem = withContext(Dispatchers.IO) {
-        if (item.source == "minebbs") {
-            mineBbs.getVersion(item) ?: item.copy(downloadUrl = null)
+        if (item.source == "mcfun") {
+            mcFun.getDetail(item) ?: item.copy(downloadUrl = null)
         } else {
             modrinth.getVersion(item) ?: item.copy(downloadUrl = null)
         }
