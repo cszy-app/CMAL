@@ -75,7 +75,7 @@ fun MarketScreen() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = vm.query,
-                onValueChange = { vm.setQuery(it) },
+                onValueChange = { vm.updateQuery(it) },
                 modifier = Modifier.weight(1f),
                 placeholder = { Text(stringResource(R.string.market_search_hint)) },
                 singleLine = true

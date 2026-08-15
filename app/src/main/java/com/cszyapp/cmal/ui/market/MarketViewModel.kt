@@ -41,7 +41,7 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    fun setQuery(q: String) {
+    fun updateQuery(q: String) {
         query = q
     }
 
