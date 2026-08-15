@@ -32,13 +32,14 @@ class UpdateChecker(private val context: Context?) {
     }
 
     /** 当前应用版本号 */
-    fun currentVersion(): String =
-        try {
-            if (context == null) return "0.1"
+    fun currentVersion(): String {
+        if (context == null) return "0.1"
+        return try {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "0.1"
         } catch (_: PackageManager.NameNotFoundException) {
             "0.1"
         }
+    }
 
     /**
      * 检查更新。返回 null 表示已是最新
