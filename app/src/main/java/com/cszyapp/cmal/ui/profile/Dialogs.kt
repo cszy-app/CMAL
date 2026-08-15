@@ -7,17 +7,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cszyapp.cmal.R
 import com.cszyapp.cmal.data.AppContainer
-import com.cszyapp.cmal.ui.settings.SettingsViewModel
 
 /** 主题模式选择对话框 */
 @Composable
@@ -100,86 +90,6 @@ fun LanguageDialog(
                         )
                         Text(label, style = MaterialTheme.typography.bodyLarge)
                     }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) }
-        }
-    )
-}
-
-/** 下载源管理对话框 */
-@Composable
-fun SourceManagerDialog(vm: SettingsViewModel, onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    var name by remember { mutableStateOf("") }
-    var url by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.download_source)) },
-        text = {
-            Column {
-                vm.customSources.forEach { source ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(source.name, style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                source.baseUrl,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        if (source.id != "official") {
-                            IconButton(onClick = {
-                                vm.removeSource(source)
-                            }) {
-                                Icon(
-                                    Icons.Filled.Delete,
-                                    contentDescription = stringResource(R.string.delete),
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-                    }
-                    HorizontalDivider()
-                }
-
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.server_name)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = { url = it },
-                    label = { Text(stringResource(R.string.source_url)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(Modifier.height(8.dp))
-                TextButton(
-                    onClick = {
-                        if (vm.addSource(name.trim(), url.trim())) {
-                            name = ""
-                            url = ""
-                            Toast.makeText(context, R.string.added, Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, R.string.info_incomplete, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.add_source))
                 }
             }
         },

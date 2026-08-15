@@ -35,33 +35,4 @@ class CoreLogicTest {
         assertEquals("1.0 MB", formatSize(1024 * 1024))
         assertEquals("1.00 GB", formatSize(1024L * 1024 * 1024))
     }
-
-    @Test
-    fun parseVersionIndex_jsonParsing() {
-        val body = """
-            [
-              {"name":"1.21.40","code":10000000,"url":"https://example.com/1.apk","size":1048576},
-              {"name":"1.21.31","code":9990000,"url":"https://example.com/2.apk","size":2048}
-            ]
-        """.trimIndent()
-
-        val parsed = parseIndex(body)
-        assertEquals(2, parsed.size)
-        assertEquals("1.21.40", parsed[0].versionName)
-        assertEquals(9990000, parsed[1].versionCode)
-        assertEquals(2048L, parsed[1].size)
-    }
-
-    private fun parseIndex(body: String): List<com.cszyapp.cmal.data.db.McVersion> {
-        val arr = org.json.JSONArray(body)
-        return (0 until arr.length()).map { i ->
-            val o = arr.getJSONObject(i)
-            com.cszyapp.cmal.data.db.McVersion(
-                versionCode = o.getInt("code"),
-                versionName = o.getString("name"),
-                downloadUrl = o.getString("url"),
-                size = o.optLong("size", 0L)
-            )
-        }
-    }
 }

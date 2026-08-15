@@ -5,7 +5,7 @@
     <string name="developer">cszy-app</string>
 
     <string name="tab_home">Home</string>
-    <string name="tab_download">Downloads</string>
+    <string name="tab_local_apk">Local APK</string>
     <string name="tab_resources">Resources</string>
     <string name="tab_servers">Servers</string>
     <string name="tab_profile">Mine</string>
@@ -17,11 +17,6 @@
     <string name="version">Version</string>
     <string name="current_version">Current version</string>
     <string name="latest_version">Latest version</string>
-    <string name="download">Download</string>
-    <string name="download_install">Download &amp; install</string>
-    <string name="installed_ready">Downloaded, ready to install</string>
-    <string name="size">Size</string>
-    <string name="search">Search</string>
     <string name="open_minecraft">Open Minecraft</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
@@ -32,8 +27,7 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="retry">Retry</string>
-    <string name="refresh_version">Refresh versions</string>
-    <string name="install_from_download">Install from Download tab</string>
+    <string name="install_from_apk">Install from Local APK tab</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
     <string name="add">Add</string>
@@ -43,13 +37,11 @@
     <string name="empty">Nothing here yet</string>
     <string name="error">Something went wrong</string>
     <string name="network_error">Network error</string>
-    <string name="download_speed">%1$s/s</string>
-    <string name="progress_percent">%1$d%%</string>
 
     <string name="onboard_welcome_title">Welcome to CMAL</string>
     <string name="onboard_welcome_desc">The Citrine Minecraft Android Launcher\nManage versions, resources, skins, worlds and servers — all in one place.</string>
-    <string name="onboard_feature1_title">Multi-version</string>
-    <string name="onboard_feature1_desc">Download and switch between multiple Minecraft versions with multi-threaded speed.</string>
+    <string name="onboard_feature1_title">One-tap launch</string>
+    <string name="onboard_feature1_desc">Install Minecraft from a local APK and launch it instantly.</string>
     <string name="onboard_feature2_title">Resources &amp; Skins</string>
     <string name="onboard_feature2_desc">Import .mcpack / .mcaddon packs and manage skins and worlds.</string>
     <string name="onboard_feature3_title">Servers &amp; Backup</string>
@@ -67,11 +59,7 @@
     <string name="language_zh">简体中文</string>
     <string name="language_en">English</string>
 
-    <string name="download_source">Download source</string>
-    <string name="source_official">Official mirror</string>
-    <string name="source_user_apk">Local APK</string>
-    <string name="add_source">Add source</string>
-    <string name="source_url">Source URL</string>
+    <string name="local_apk_hint">CMAL does not distribute Minecraft APKs. Install Minecraft by selecting an APK file you obtained from official channels.</string>
 
     <string name="mc_install">Install Minecraft</string>
     <string name="select_apk">Select APK file</string>
@@ -123,4 +111,12 @@
 
     <string name="permission_storage">Storage permission needed</string>
     <string name="permission_storage_desc">CMAL needs storage access to install APKs and import files.</string>
+
+    <string name="xbox_account">Xbox account</string>
+    <string name="xbox_login">Sign in with Xbox</string>
+    <string name="xbox_logout">Sign out</string>
+    <string name="xbox_not_logged_in">Not signed in</string>
+    <string name="xbox_device_hint">Open the link below on your device or computer, then enter this code:</string>
+    <string name="xbox_open_link">Open microsoft.com/link</string>
+    <string name="xbox_waiting">Waiting for you to confirm in the browser…</string>
 </resources>

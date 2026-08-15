@@ -9,27 +9,6 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface McVersionDao {
-    @Query("SELECT * FROM mc_versions ORDER BY versionCode DESC")
-    fun observeAll(): Flow<List<McVersion>>
-
-    @Query("SELECT * FROM mc_versions WHERE versionCode = :code")
-    suspend fun get(code: Int): McVersion?
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(version: McVersion)
-
-    @Delete
-    suspend fun delete(version: McVersion)
-
-    @Query("DELETE FROM mc_versions")
-    suspend fun clear()
-
-    @Query("SELECT * FROM mc_versions WHERE downloaded = 1 ORDER BY versionCode DESC LIMIT 1")
-    suspend fun latestDownloaded(): McVersion?
-}
-
-@Dao
 interface ServerDao {
     @Query("SELECT * FROM servers ORDER BY featured DESC, id DESC")
     fun observeAll(): Flow<List<McServer>>
@@ -75,16 +54,4 @@ interface ResourceDao {
 
     @Delete
     suspend fun delete(resource: McResource)
-}
-
-@Dao
-interface DownloadTaskDao {
-    @Query("SELECT * FROM download_tasks ORDER BY createdAt DESC")
-    fun observeAll(): Flow<List<DownloadTask>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(task: DownloadTask)
-
-    @Delete
-    suspend fun delete(task: DownloadTask)
 }

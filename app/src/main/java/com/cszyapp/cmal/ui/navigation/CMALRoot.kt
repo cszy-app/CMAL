@@ -2,8 +2,8 @@ package com.cszyapp.cmal.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Public
@@ -24,8 +24,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cszyapp.cmal.CMalApp
 import com.cszyapp.cmal.R
-import com.cszyapp.cmal.ui.download.DownloadScreen
 import com.cszyapp.cmal.ui.home.HomeScreen
+import com.cszyapp.cmal.ui.localapk.LocalApkScreen
 import com.cszyapp.cmal.ui.onboarding.OnboardingScreen
 import com.cszyapp.cmal.ui.profile.ProfileScreen
 import com.cszyapp.cmal.ui.resources.ResourcesScreen
@@ -34,7 +34,7 @@ import com.cszyapp.cmal.ui.servers.ServersScreen
 /** 底部 Tab 定义 */
 private enum class MainTab(val route: String, val labelRes: Int, val icon: ImageVector) {
     HOME("home", R.string.tab_home, Icons.Filled.Home),
-    DOWNLOAD("download", R.string.tab_download, Icons.Filled.Download),
+    LOCAL_APK("local_apk", R.string.tab_local_apk, Icons.Filled.InstallMobile),
     RESOURCES("resources", R.string.tab_resources, Icons.Filled.Inventory2),
     SERVERS("servers", R.string.tab_servers, Icons.Filled.Public),
     PROFILE("profile", R.string.tab_profile, Icons.Filled.Person),
@@ -109,8 +109,8 @@ private fun MainScaffold() {
             composable(MainTab.HOME.route) {
                 HomeScreen()
             }
-            composable(MainTab.DOWNLOAD.route) {
-                DownloadScreen()
+            composable(MainTab.LOCAL_APK.route) {
+                LocalApkScreen()
             }
             composable(MainTab.RESOURCES.route) {
                 ResourcesScreen()

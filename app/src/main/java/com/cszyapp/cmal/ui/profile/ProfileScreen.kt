@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -106,6 +105,11 @@ fun ProfileScreen() {
             }
         }
 
+        // Xbox 账户
+        item {
+            XboxSection()
+        }
+
         // 设置项
         item {
             SettingsCard()
@@ -182,7 +186,6 @@ private fun SettingsCard() {
 
     var showThemePicker by remember { mutableStateOf(false) }
     var showLanguage by remember { mutableStateOf(false) }
-    var showSources by remember { mutableStateOf(false) }
     var showBackup by remember { mutableStateOf(false) }
 
     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
@@ -232,12 +235,6 @@ private fun SettingsCard() {
             )
             HorizontalDivider()
             SettingRow(
-                icon = Icons.Filled.Storage,
-                title = stringResource(R.string.download_source),
-                onClick = { showSources = true }
-            )
-            HorizontalDivider()
-            SettingRow(
                 icon = Icons.Filled.Build,
                 title = stringResource(R.string.backup_restore),
                 onClick = { showBackup = true }
@@ -274,10 +271,6 @@ private fun SettingsCard() {
             },
             onDismiss = { showLanguage = false }
         )
-    }
-
-    if (showSources) {
-        SourceManagerDialog(vm, onDismiss = { showSources = false })
     }
 
     if (showBackup) {

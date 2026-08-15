@@ -5,7 +5,7 @@
     <string name="developer">cszy-app</string>
 
     <string name="tab_home">首页</string>
-    <string name="tab_download">下载</string>
+    <string name="tab_local_apk">本地APK</string>
     <string name="tab_resources">资源</string>
     <string name="tab_servers">服务器</string>
     <string name="tab_profile">我的</string>
@@ -17,11 +17,6 @@
     <string name="version">版本</string>
     <string name="current_version">当前版本</string>
     <string name="latest_version">最新版本</string>
-    <string name="download">下载</string>
-    <string name="download_install">下载并安装</string>
-    <string name="installed_ready">已下载，可安装</string>
-    <string name="size">大小</string>
-    <string name="search">搜索</string>
     <string name="open_minecraft">打开 Minecraft</string>
     <string name="settings">设置</string>
     <string name="about">关于</string>
@@ -32,8 +27,7 @@
     <string name="cancel">取消</string>
     <string name="confirm">确认</string>
     <string name="retry">重试</string>
-    <string name="refresh_version">刷新版本列表</string>
-    <string name="install_from_download">请到下载页安装 Minecraft</string>
+    <string name="install_from_apk">请到「本地APK」页安装 Minecraft</string>
     <string name="delete">删除</string>
     <string name="edit">编辑</string>
     <string name="add">添加</string>
@@ -43,13 +37,11 @@
     <string name="empty">这里还没有内容</string>
     <string name="error">出了点问题</string>
     <string name="network_error">网络错误</string>
-    <string name="download_speed">%1$s/秒</string>
-    <string name="progress_percent">%1$d%%</string>
 
     <string name="onboard_welcome_title">欢迎使用 CMAL</string>
     <string name="onboard_welcome_desc">Citrine Minecraft Android 启动器\n版本、资源、皮肤、世界、服务器，一应俱全。</string>
-    <string name="onboard_feature1_title">多版本管理</string>
-    <string name="onboard_feature1_desc">多线程高速下载，自由切换多个 Minecraft 版本。</string>
+    <string name="onboard_feature1_title">一键启动</string>
+    <string name="onboard_feature1_desc">从本地 APK 安装 Minecraft，一键启动游戏。</string>
     <string name="onboard_feature2_title">资源与皮肤</string>
     <string name="onboard_feature2_desc">导入 .mcpack / .mcaddon 资源包，管理皮肤与世界。</string>
     <string name="onboard_feature3_title">服务器与备份</string>
@@ -67,11 +59,7 @@
     <string name="language_zh">简体中文</string>
     <string name="language_en">English</string>
 
-    <string name="download_source">下载源</string>
-    <string name="source_official">官方镜像源</string>
-    <string name="source_user_apk">本地 APK</string>
-    <string name="add_source">添加源</string>
-    <string name="source_url">源地址</string>
+    <string name="local_apk_hint">CMAL 不分发 Minecraft APK。请从官方渠道获取 APK 文件后在此安装。</string>
 
     <string name="mc_install">安装 Minecraft</string>
     <string name="select_apk">选择 APK 文件</string>
@@ -123,4 +111,12 @@
 
     <string name="permission_storage">需要存储权限</string>
     <string name="permission_storage_desc">CMAL 需要存储权限用于安装 APK 和导入文件。</string>
+
+    <string name="xbox_account">Xbox 账户</string>
+    <string name="xbox_login">使用 Xbox 登录</string>
+    <string name="xbox_logout">退出登录</string>
+    <string name="xbox_not_logged_in">未登录</string>
+    <string name="xbox_device_hint">在手机或电脑上打开下面的链接，然后输入这个代码：</string>
+    <string name="xbox_open_link">打开 microsoft.com/link</string>
+    <string name="xbox_waiting">正在等待你在浏览器中确认…</string>
 </resources>

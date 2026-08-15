@@ -12,9 +12,8 @@
 
 ## 功能特性
 
-- 🚀 **官方版安装 + 一键启动**：下载官方 Minecraft Bedrock APK，标准流程安装后直接启动
-- 📦 **多版本下载与切换**：多线程分片下载（断点续传），多个版本随意切换
-- ⚡ **极限并发下载**：单文件分片 + 多文件并行，速度拉满
+- 🚀 **官方版安装 + 一键启动**：从本地 APK 安装官方 Minecraft Bedrock，标准流程安装后直接启动
+- 🧍 **Xbox 登录**：内置 Microsoft 账户授权（设备码流），登录后管理 Xbox 账户
 - 🎨 **资源包 / 行为包**：导入 `.mcpack` / `.mcaddon` / `.mcworld`
 - 🧍 **皮肤管理**：本地皮肤 + 联网皮肤库
 - 🌍 **世界管理**：存档浏览、导入、导出、删除
@@ -29,7 +28,7 @@
 | 中文 | English |
 |------|---------|
 | 首页 | Home |
-| 下载 | Downloads |
+| 本地APK | Local APK |
 | 资源 | Resources |
 | 服务器 | Servers |
 | 我的 | Mine |
@@ -39,7 +38,7 @@
 - **Kotlin** + **Jetpack Compose**（Material 3）
 - **MVVM** 架构
 - **Room** 本地数据库 + SharedPreferences
-- **OkHttp** 多线程分片下载（Range 断点续传）
+- **OkHttp** 网络请求（Xbox 授权 / 更新检查）
 - **Coil** 图片加载
 - **GitHub Actions** 云端构建
 
@@ -55,16 +54,15 @@ CMAL/
 │       │   ├── java/com/cszyapp/cmal/
 │       │   │   ├── CMalApp.kt        # Application + DI 容器
 │       │   │   ├── MainActivity.kt   # 主 Activity（处理打开/分享）
-│       │   │   ├── data/             # 数据层（Room/下载/安装/更新/源）
-│       │   │   │   ├── download/     # 多线程下载引擎
+│       │   │   ├── data/             # 数据层（Room/安装/更新/Xbox）
 │       │   │   │   ├── install/      # 安装管理（FileProvider）
 │       │   │   │   ├── repo/         # Repository
-│       │   │   │   ├── source/       # 下载源管理
-│       │   │   │   └── update/       # 更新检查
+│       │   │   │   ├── update/       # 更新检查
+│       │   │   │   └── xbox/         # Xbox 登录（设备码流）
 │       │   │   └── ui/               # UI 层（Compose）
 │       │   │       ├── navigation/   # 底部导航
 │       │   │       ├── home/         # 首页
-│       │   │       ├── download/     # 下载页
+│       │   │       ├── localapk/     # 本地 APK 安装页
 │       │   │       ├── resources/    # 资源页
 │       │   │       ├── servers/      # 服务器页
 │       │   │       ├── profile/      # 我的页
@@ -75,7 +73,6 @@ CMAL/
 ├── gradle/
 │   └── libs.versions.toml        # 版本目录
 ├── .github/workflows/build.yml   # GitHub Actions 云构建
-├── mc_versions.json              # 版本索引示例
 ├── CHANGELOG.md
 └── README.md
 ```
@@ -124,27 +121,21 @@ base64 -w 0 cmal-release.jks
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("cmal-release.jks"))
 ```
 
-### 4. 配置 Minecraft 版本源
+### 4. 安装 Minecraft（用户自备 APK）
 
-版本索引来自 `mc_versions.json`（默认指向本仓库）。格式：
+CMAL **不分发 Minecraft APK**。请从官方渠道（如 Google Play）购买并获取 APK 文件：
 
-```json
-[
-  {
-    "name": "1.21.40",
-    "code": 10000000,
-    "url": "https://example.com/minecraft-1.21.40.apk",
-    "size": 1048576
-  }
-]
-```
+1. 将 Minecraft APK 文件放到设备上（可通过浏览器下载或从其他设备传输）
+2. 打开 CMAL → 「本地APK」页 → 选择 APK 文件 → 系统完成安装
+3. 返回「首页」即可一键启动
 
-- `name`：版本名（也作为下载文件名）
-- `code`：唯一版本号（建议用日期/序号）
-- `url`：APK 直链（需支持 Range 请求以启用分片下载）
-- `size`：字节大小
+### 5. 配置 Xbox 登录
 
-可在应用内「我的 → 下载源」添加自定义源。
+CMAL 使用 Microsoft OAuth 设备码流登录 Xbox：
+
+1. 在 [Azure 门户](https://portal.azure.com/) 注册一个应用，开启「允许公共客户端流」
+2. 将应用的 **Client ID** 填入 `app/src/main/java/com/cszyapp/cmal/data/xbox/XboxAuthManager.kt` 的 `CLIENT_ID` 常量
+3. 在应用「我的」页点击 Xbox 登录，按提示在浏览器中确认即可
 
 ## 版权与免责声明
 

@@ -26,9 +26,6 @@ class SettingsRepository(private val preferences: Preferences) {
             preferences.language = value
         }
 
-    val customSources: String
-        get() = preferences.customSources
-
     var disclaimerAccepted: Boolean
         get() = preferences.disclaimerAccepted
         set(value) {

@@ -33,20 +33,15 @@ class Preferences(context: Context) {
         get() = prefs.getString(KEY_LANGUAGE, "auto") ?: "auto"
         set(value) = prefs.edit().putString(KEY_LANGUAGE, value).apply()
 
-    /** 自定义下载源列表，JSON 数组 */
-    var customSources: String
-        get() = prefs.getString(KEY_CUSTOM_SOURCES, "[]") ?: "[]"
-        set(value) = prefs.edit().putString(KEY_CUSTOM_SOURCES, value).apply()
-
-    /** 下载并发线程数 */
-    var downloadThreads: Int
-        get() = prefs.getInt(KEY_DOWNLOAD_THREADS, 8)
-        set(value) = prefs.edit().putInt(KEY_DOWNLOAD_THREADS, value).apply()
-
     /** 免责声明是否已同意 */
     var disclaimerAccepted: Boolean
         get() = prefs.getBoolean(KEY_DISCLAIMER_ACCEPTED, false)
         set(value) = prefs.edit().putBoolean(KEY_DISCLAIMER_ACCEPTED, value).apply()
+
+    /** Xbox 账户 JSON（登录后保存） */
+    var xboxAccount: String
+        get() = prefs.getString(KEY_XBOX_ACCOUNT, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_XBOX_ACCOUNT, value).apply()
 
     fun putString(key: String, value: String) {
         prefs.edit().putString(key, value).apply()
@@ -74,10 +69,8 @@ class Preferences(context: Context) {
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_ACCENT_COLOR = "accent_color"
         const val KEY_LANGUAGE = "language"
-        const val KEY_CUSTOM_SOURCES = "custom_sources"
-        const val KEY_DOWNLOAD_THREADS = "download_threads"
         const val KEY_DISCLAIMER_ACCEPTED = "disclaimer_accepted"
-        const val KEY_SOURCE_VERSION_INDEX = "source_version_index"
+        const val KEY_XBOX_ACCOUNT = "xbox_account"
 
         /** 默认琥珀色（Citrine） */
         const val DEFAULT_ACCENT = 0xFFF5A623L
