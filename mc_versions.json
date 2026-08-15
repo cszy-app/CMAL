@@ -1,0 +1,20 @@
+[
+  {
+    "name": "1.21.40",
+    "code": 10000000,
+    "url": "https://raw.githubusercontent.com/cszy-app/CMAL/main/mirror/minecraft-1.21.40.apk",
+    "size": 524288000
+  },
+  {
+    "name": "1.21.31",
+    "code": 9900000,
+    "url": "https://raw.githubusercontent.com/cszy-app/CMAL/main/mirror/minecraft-1.21.31.apk",
+    "size": 512000000
+  },
+  {
+    "name": "1.20.81",
+    "code": 9800000,
+    "url": "https://raw.githubusercontent.com/cszy-app/CMAL/main/mirror/minecraft-1.20.81.apk",
+    "size": 498000000
+  }
+]

@@ -1,0 +1,26 @@
+# Gradle
+.gradle/
+build/
+app/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration files (sensitive)
+keystore.properties
+*.jks
+*.keystore
+local.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+
+# Backup files
+*.bak
