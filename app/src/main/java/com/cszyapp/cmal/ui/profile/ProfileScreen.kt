@@ -252,7 +252,7 @@ private fun SettingsCard() {
         ThemePickerDialog(
             current = vm.themeMode,
             onSelect = { mode ->
-                vm.setThemeMode(mode)
+                vm.updateThemeMode(mode)
                 showThemePicker = false
             },
             onDismiss = { showThemePicker = false }
@@ -263,7 +263,7 @@ private fun SettingsCard() {
         LanguageDialog(
             current = vm.language,
             onSelect = { lang ->
-                vm.setLanguage(lang)
+                vm.updateLanguage(lang)
                 showLanguage = false
                 // 语言切换后重启 Activity 使资源生效
                 val activity = context as? android.app.Activity

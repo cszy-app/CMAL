@@ -28,17 +28,17 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     var checkingUpdate by mutableStateOf(false)
         private set
 
-    fun setThemeMode(mode: String) {
+    fun updateThemeMode(mode: String) {
         themeMode = mode
         container.settingsRepository.themeMode = mode
     }
 
-    fun setAccentColor(color: Long) {
+    fun updateAccentColor(color: Long) {
         accentColor = color
         container.settingsRepository.accentColor = color
     }
 
-    fun setLanguage(lang: String) {
+    fun updateLanguage(lang: String) {
         language = lang
         container.settingsRepository.language = lang
         // 简单重启方式：通过重启 Activity 由 MainActivity 处理
