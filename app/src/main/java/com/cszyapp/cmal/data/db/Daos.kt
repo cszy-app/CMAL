@@ -55,3 +55,21 @@ interface ResourceDao {
     @Delete
     suspend fun delete(resource: McResource)
 }
+
+@Dao
+interface InstanceDao {
+    @Query("SELECT * FROM instances ORDER BY isDefault DESC, createdAt ASC")
+    fun observeAll(): Flow<List<McInstance>>
+
+    @Query("SELECT * FROM instances WHERE id = :id")
+    suspend fun getById(id: Long): McInstance?
+
+    @Query("UPDATE instances SET isDefault = 0")
+    suspend fun clearDefault()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(instance: McInstance): Long
+
+    @Delete
+    suspend fun delete(instance: McInstance)
+}

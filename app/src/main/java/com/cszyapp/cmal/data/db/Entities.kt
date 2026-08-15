@@ -54,3 +54,17 @@ data class McResource(
     val installed: Boolean = false,
     val importedAt: Long = System.currentTimeMillis()
 )
+
+/**
+ * Minecraft 版本实例
+ * 一个实例绑定一个已安装的 MC 包（不同版本/渠道包名不同）
+ */
+@Entity(tableName = "instances")
+data class McInstance(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val packageName: String,
+    val versionName: String = "",
+    val isDefault: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
+)

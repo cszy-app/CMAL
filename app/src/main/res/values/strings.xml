@@ -81,6 +81,12 @@
     <string name="file_not_found">File not found</string>
     <string name="please_install_first">Please install Minecraft first</string>
 
+    <string name="instances">Instances</string>
+    <string name="add_instance">Add instance</string>
+    <string name="instances_empty">No instances yet. Add a detected Minecraft version below.</string>
+    <string name="no_mc_installed">No Minecraft packages found on this device</string>
+    <string name="select_instance_hint">Choose a detected Minecraft version to add as an instance:</string>
+
     <string name="import_pack">Import pack</string>
     <string name="import_success">Imported</string>
     <string name="import_fail">Import failed</string>

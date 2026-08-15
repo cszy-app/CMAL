@@ -81,6 +81,12 @@
     <string name="file_not_found">文件不存在</string>
     <string name="please_install_first">请先安装 Minecraft</string>
 
+    <string name="instances">版本实例</string>
+    <string name="add_instance">添加实例</string>
+    <string name="instances_empty">还没有实例，点右上角添加已检测到的 Minecraft 版本。</string>
+    <string name="no_mc_installed">设备上未检测到 Minecraft 相关包</string>
+    <string name="select_instance_hint">选择要添加为实例的已安装版本：</string>
+
     <string name="import_pack">导入资源包</string>
     <string name="import_success">导入成功</string>
     <string name="import_fail">导入失败</string>

@@ -36,8 +36,11 @@ class SystemHelper(private val context: Context) {
         }
 
     /** 启动已安装的 Minecraft */
-    fun launchMc(): Boolean {
-        val intent = context.packageManager.getLaunchIntentForPackage(MC_PACKAGE) ?: return false
+    fun launchMc(): Boolean = launchPackage(MC_PACKAGE)
+
+    /** 启动任意已安装的 Minecraft 系列包 */
+    fun launchPackage(packageName: String): Boolean {
+        val intent = context.packageManager.getLaunchIntentForPackage(packageName) ?: return false
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         try {
             context.startActivity(intent)
