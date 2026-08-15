@@ -1,4 +1,5 @@
 import java.io.FileInputStream
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -23,7 +24,7 @@ var releaseKeyPassword: String? = null
 if (!keyStoreBase64.isNullOrBlank() && !keyStorePassword.isNullOrBlank()
     && !keyAlias.isNullOrBlank() && !keyPassword.isNullOrBlank()
 ) {
-    val decoded = java.util.Base64.getDecoder().decode(keyStoreBase64)
+    val decoded = Base64.getDecoder().decode(keyStoreBase64)
     val f = file("${buildDir}/cmal-release.jks")
     f.parentFile.mkdirs()
     f.writeBytes(decoded)
