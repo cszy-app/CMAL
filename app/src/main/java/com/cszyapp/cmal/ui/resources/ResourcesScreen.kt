@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,9 +46,6 @@ import com.cszyapp.cmal.data.db.McResource
 import com.cszyapp.cmal.data.db.McSkin
 import com.cszyapp.cmal.data.db.McWorld
 import com.cszyapp.cmal.ui.navigation.SimpleFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.File
 
 /** 资源页：资源包 / 皮肤 / 世界 */
@@ -58,11 +56,12 @@ fun ResourcesScreen() {
     val vm: ResourcesViewModel = viewModel(factory = SimpleFactory { ResourcesViewModel(container) })
 
     // 打开文件选择器（导入资源）
+    val scope = rememberCoroutineScope()
     val importLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
-            CoroutineScope(Dispatchers.Main).launch {
+            scope.launch {
                 com.cszyapp.cmal.ui.imports.ImportHandler(context, container).handle(it)
             }
         }

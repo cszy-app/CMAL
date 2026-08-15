@@ -23,7 +23,7 @@ class CoreLogicTest {
         method.isAccessible = true
 
         assertTrue(method.invoke(checker, "v1.2.0", "1.1.9") as Boolean)
-        assertTrue(method.invoke(checker, "v1.2.0", "1.2.0-beta") as Boolean)
+        assertTrue(method.invoke(checker, "v1.2.1", "1.2.0") as Boolean)
         assertFalse(method.invoke(checker, "v1.0.0", "1.0.1") as Boolean)
         assertFalse(method.invoke(checker, "v1.0.0", "1.0.0") as Boolean)
     }

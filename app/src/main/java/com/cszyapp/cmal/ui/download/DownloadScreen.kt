@@ -63,6 +63,8 @@ fun DownloadScreen() {
             val intent = container.installManager.createInstallIntent(file)
             context.startActivity(intent)
         }
+        // 重置事件，确保同路径二次下载完成时仍能触发安装
+        vm.consumePendingInstall()
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {

@@ -64,7 +64,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
             Intent.ACTION_SEND -> {
-                val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM) ?: return
+                val uri: Uri? = if (android.os.Build.VERSION.SDK_INT >= 33) {
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+                }
+                uri ?: return
                 lifecycleScope.launch {
                     importHandler.handle(uri)
                 }

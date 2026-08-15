@@ -220,7 +220,9 @@ class DownloadManager(
             .header("User-Agent", "CMAL/0.1")
             .build()
         client.newCall(request).execute().use { resp ->
-            if (!resp.isSuccessful && resp.code != 206) return@use
+            // 只接受 206 Partial Content；若服务器忽略 Range 返回 200（完整文件），
+            // 直接放弃该分片，避免把整文件写进每个分片导致合并损坏
+            if (resp.code != 206) return@use
             resp.body ?: return@use
             val body = resp.body!!
             RandomAccessFile(partFile, "rw").use { raf ->

@@ -93,4 +93,9 @@ class DownloadViewModel(private val container: AppContainer) : ViewModel() {
             }
         }
     }
+
+    /** 消费"待安装"事件（UI 触发安装后重置） */
+    fun consumePendingInstall() {
+        _pendingInstalls.value = null
+    }
 }

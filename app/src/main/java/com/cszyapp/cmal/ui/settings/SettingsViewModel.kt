@@ -7,7 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cszyapp.cmal.data.AppContainer
 import com.cszyapp.cmal.data.source.DownloadSource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** 设置页 ViewModel */
 class SettingsViewModel(private val container: AppContainer) : ViewModel() {
@@ -62,7 +64,9 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
         if (checkingUpdate) return
         checkingUpdate = true
         viewModelScope.launch {
-            val result = container.updateChecker.check()
+            val result = withContext(Dispatchers.IO) {
+                container.updateChecker.check()
+            }
             checkingUpdate = false
             updateInfo = result.getOrNull()?.let { "update:${it.versionName}" } ?: "up_to_date"
         }
