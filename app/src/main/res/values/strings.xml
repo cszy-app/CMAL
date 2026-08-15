@@ -127,6 +127,8 @@
     <string name="xbox_account">Xbox account</string>
     <string name="xbox_login">Sign in with Xbox</string>
     <string name="xbox_logout">Sign out</string>
+    <string name="xbox_switch">Switch account</string>
+    <string name="xbox_use">Use</string>
     <string name="xbox_not_logged_in">Not signed in</string>
     <string name="xbox_device_hint">Open the link below on your device or computer, then enter this code:</string>
     <string name="xbox_open_link">Open microsoft.com/link</string>

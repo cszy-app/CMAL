@@ -43,6 +43,16 @@ class Preferences(context: Context) {
         get() = prefs.getString(KEY_XBOX_ACCOUNT, "") ?: ""
         set(value) = prefs.edit().putString(KEY_XBOX_ACCOUNT, value).apply()
 
+    /** 多账户 JSON 数组 */
+    var xboxAccounts: String
+        get() = prefs.getString(KEY_XBOX_ACCOUNTS, "[]") ?: "[]"
+        set(value) = prefs.edit().putString(KEY_XBOX_ACCOUNTS, value).apply()
+
+    /** 当前激活账户的 xuid */
+    var activeXuid: String
+        get() = prefs.getString(KEY_ACTIVE_XUID, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_ACTIVE_XUID, value).apply()
+
     fun putString(key: String, value: String) {
         prefs.edit().putString(key, value).apply()
     }
@@ -71,6 +81,8 @@ class Preferences(context: Context) {
         const val KEY_LANGUAGE = "language"
         const val KEY_DISCLAIMER_ACCEPTED = "disclaimer_accepted"
         const val KEY_XBOX_ACCOUNT = "xbox_account"
+        const val KEY_XBOX_ACCOUNTS = "xbox_accounts"
+        const val KEY_ACTIVE_XUID = "active_xuid"
 
         /** 默认琥珀色（Citrine） */
         const val DEFAULT_ACCENT = 0xFFF5A623L

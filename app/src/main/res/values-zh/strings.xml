@@ -127,6 +127,8 @@
     <string name="xbox_account">Xbox 账户</string>
     <string name="xbox_login">使用 Xbox 登录</string>
     <string name="xbox_logout">退出登录</string>
+    <string name="xbox_switch">切换账号</string>
+    <string name="xbox_use">使用</string>
     <string name="xbox_not_logged_in">未登录</string>
     <string name="xbox_device_hint">在手机或电脑上打开下面的链接，然后输入这个代码：</string>
     <string name="xbox_open_link">打开 microsoft.com/link</string>

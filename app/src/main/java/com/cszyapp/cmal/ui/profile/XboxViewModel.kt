@@ -11,10 +11,13 @@ import com.cszyapp.cmal.data.xbox.XboxAccount
 import com.cszyapp.cmal.data.xbox.XboxAuthException
 import kotlinx.coroutines.launch
 
-/** Xbox 登录 ViewModel */
+/** Xbox 登录 ViewModel（支持多账号切换） */
 class XboxViewModel(private val container: AppContainer) : ViewModel() {
 
     var account: XboxAccount? by mutableStateOf(container.xboxAuthManager.load())
+        private set
+
+    var accounts by mutableStateOf(container.xboxAuthManager.allAccounts())
         private set
 
     var deviceCode: DeviceCodeInfo? by mutableStateOf(null)
@@ -41,6 +44,7 @@ class XboxViewModel(private val container: AppContainer) : ViewModel() {
                 val acc = container.xboxAuthManager.completeLogin(accessToken)
                 container.xboxAuthManager.save(acc)
                 account = acc
+                accounts = container.xboxAuthManager.allAccounts()
                 loggedIn = true
             } catch (e: XboxAuthException) {
                 error = "Xbox ${e.stage} ${e.errorCode} · ${XboxAuthException.describe(e.errorCode, e.message ?: "登录失败")}"
@@ -52,6 +56,22 @@ class XboxViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
+    fun switchAccount(xuid: String) {
+        val acc = container.xboxAuthManager.switchTo(xuid)
+        if (acc != null) {
+            account = acc
+            accounts = container.xboxAuthManager.allAccounts()
+            loggedIn = acc.expiresAt > System.currentTimeMillis()
+        }
+    }
+
+    fun removeAccount(xuid: String) {
+        container.xboxAuthManager.removeAccount(xuid)
+        accounts = container.xboxAuthManager.allAccounts()
+        account = container.xboxAuthManager.load()
+        loggedIn = container.xboxAuthManager.isLoggedIn()
+    }
+
     fun cancel() {
         loggingIn = false
         deviceCode = null
@@ -60,6 +80,7 @@ class XboxViewModel(private val container: AppContainer) : ViewModel() {
     fun logout() {
         container.xboxAuthManager.clear()
         account = null
+        accounts = emptyList()
         loggedIn = false
     }
 

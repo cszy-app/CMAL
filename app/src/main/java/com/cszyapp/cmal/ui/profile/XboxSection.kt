@@ -41,7 +41,7 @@ import com.cszyapp.cmal.data.AppContainer
 import com.cszyapp.cmal.ui.navigation.SimpleFactory
 
 /**
- * Xbox 账户卡片：登录 / 显示玩家代号 / 退出
+ * Xbox 账户卡片：登录 / 显示玩家代号 / 多账号切换 / 退出
  */
 @Composable
 fun XboxSection() {
@@ -50,6 +50,7 @@ fun XboxSection() {
     val vm: XboxViewModel = viewModel(factory = SimpleFactory { XboxViewModel(container) })
 
     var showDeviceCode by remember { mutableStateOf(false) }
+    var showAccounts by remember { mutableStateOf(false) }
 
     val account = vm.account
     Card(
@@ -83,6 +84,11 @@ fun XboxSection() {
             if (vm.loggingIn) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
             } else if (account != null) {
+                if (vm.accounts.size > 1) {
+                    TextButton(onClick = { showAccounts = true }) {
+                        Text(stringResource(R.string.xbox_switch))
+                    }
+                }
                 TextButton(onClick = { vm.logout() }) {
                     Text(stringResource(R.string.xbox_logout))
                 }
@@ -107,10 +113,62 @@ fun XboxSection() {
         )
     }
 
+    if (showAccounts) {
+        AccountSwitchDialog(
+            vm = vm,
+            onDismiss = { showAccounts = false }
+        )
+    }
+
     vm.error?.let { msg ->
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
         vm.clearError()
     }
+}
+
+@Composable
+private fun AccountSwitchDialog(
+    vm: XboxViewModel,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.xbox_switch)) },
+        text = {
+            Column(verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+                vm.accounts.forEach { acc ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                acc.gamertag,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                "XUID ${acc.xuid}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        androidx.compose.material3.OutlinedButton(onClick = {
+                            vm.switchAccount(acc.xuid)
+                            onDismiss()
+                        }) {
+                            Text(stringResource(R.string.xbox_use))
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        }
+    )
 }
 
 @Composable

@@ -86,7 +86,7 @@ class XboxAuthManager(private val preferences: Preferences) {
 
     private val jsonType = "application/json; charset=utf-8".toMediaType()
 
-    /** 读取已保存的账户 */
+    /** 读取已保存的账户（当前激活的） */
     fun load(): XboxAccount? {
         val raw = preferences.xboxAccount
         if (raw.isBlank()) return null
@@ -97,14 +97,62 @@ class XboxAuthManager(private val preferences: Preferences) {
         }
     }
 
-    /** 保存账户 */
+    /** 保存账户（加入多账户列表，并设为激活） */
     fun save(account: XboxAccount) {
         preferences.xboxAccount = account.toJson().toString()
+        val list = allAccounts().toMutableList()
+        list.removeAll { it.xuid == account.xuid }
+        list.add(0, account)
+        preferences.xboxAccounts = JSONArray().apply {
+            list.forEach { put(JSONObject(it.toJson().toString())) }
+        }.toString()
+        preferences.activeXuid = account.xuid
     }
 
-    /** 清除账户 */
+    /** 全部已保存账户 */
+    fun allAccounts(): List<XboxAccount> {
+        val raw = preferences.xboxAccounts
+        if (raw.isBlank() || raw == "[]") {
+            // 兼容旧版本单账户数据
+            val single = load()
+            return if (single != null) listOf(single) else emptyList()
+        }
+        return try {
+            val arr = JSONArray(raw)
+            (0 until arr.length()).mapNotNull { i ->
+                arr.optJSONObject(i)?.let { XboxAccount.fromJson(it) }
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    /** 切换激活账户 */
+    fun switchTo(xuid: String): XboxAccount? {
+        val acc = allAccounts().firstOrNull { it.xuid == xuid } ?: return null
+        preferences.xboxAccount = acc.toJson().toString()
+        preferences.activeXuid = xuid
+        return acc
+    }
+
+    /** 移除账户 */
+    fun removeAccount(xuid: String) {
+        val list = allAccounts().filterNot { it.xuid == xuid }
+        preferences.xboxAccounts = JSONArray().apply {
+            list.forEach { put(JSONObject(it.toJson().toString())) }
+        }.toString()
+        if (preferences.activeXuid == xuid) {
+            val next = list.firstOrNull()
+            preferences.activeXuid = next?.xuid ?: ""
+            preferences.xboxAccount = next?.toJson()?.toString() ?: ""
+        }
+    }
+
+    /** 清除全部账户 */
     fun clear() {
         preferences.xboxAccount = ""
+        preferences.xboxAccounts = "[]"
+        preferences.activeXuid = ""
     }
 
     /** 是否已登录（且未过期） */
