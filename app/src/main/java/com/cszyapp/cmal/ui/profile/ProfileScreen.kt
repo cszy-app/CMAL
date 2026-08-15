@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cszyapp.cmal.R
 import com.cszyapp.cmal.data.AppContainer
+import com.cszyapp.cmal.data.download.DownloadManager
 import com.cszyapp.cmal.ui.navigation.SimpleFactory
 import com.cszyapp.cmal.ui.settings.SettingsViewModel
 
@@ -187,6 +189,7 @@ private fun SettingsCard() {
     var showThemePicker by remember { mutableStateOf(false) }
     var showLanguage by remember { mutableStateOf(false) }
     var showBackup by remember { mutableStateOf(false) }
+    var showDownloads by remember { mutableStateOf(false) }
 
     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column {
@@ -241,6 +244,19 @@ private fun SettingsCard() {
             )
             HorizontalDivider()
             SettingRow(
+                icon = Icons.Filled.Download,
+                title = stringResource(R.string.download_manager),
+                trailing = {
+                    Text(
+                        DownloadManager.sizeString(vm.downloadDirSize).ifEmpty { "—" },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                onClick = { showDownloads = true }
+            )
+            HorizontalDivider()
+            SettingRow(
                 icon = Icons.Filled.Update,
                 title = stringResource(R.string.check_update),
                 onClick = { vm.checkUpdate() }
@@ -275,6 +291,14 @@ private fun SettingsCard() {
 
     if (showBackup) {
         BackupDialog(container, onDismiss = { showBackup = false })
+    }
+
+    if (showDownloads) {
+        DownloadDialog(
+            sizeBytes = vm.downloadDirSize,
+            onClear = { vm.clearDownloads() },
+            onDismiss = { showDownloads = false }
+        )
     }
 }
 

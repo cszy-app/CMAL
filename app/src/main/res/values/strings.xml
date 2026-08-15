@@ -105,6 +105,11 @@
     <string name="restore">Restore</string>
     <string name="backup_path">Backup location</string>
 
+    <string name="download_manager">Download manager</string>
+    <string name="download_dir_size">Downloaded files</string>
+    <string name="download_clear">Clear finished</string>
+    <string name="download_clear_hint">This only removes finished downloads. Downloads that are still running are kept.</string>
+
     <string name="check_update">Check for updates</string>
     <string name="up_to_date">You are up to date</string>
     <string name="update_available">New version available</string>

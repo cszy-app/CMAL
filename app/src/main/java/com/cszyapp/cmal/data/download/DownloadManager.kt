@@ -106,6 +106,18 @@ class DownloadManager(private val context: Context) {
         scope.cancel()
     }
 
+    /** 下载目录总占用字节数 */
+    fun downloadDirSize(): Long = downloadDir.listFiles()?.sumOf { it.length() } ?: 0L
+
+    /** 清空已完成且未在下载中的文件 */
+    fun clearFinishedDownloads() {
+        val finishedIds = _tasks.value.values.filter { it.done }.map { it.item.id }.toSet()
+        _tasks.update { m ->
+            m.filterKeys { it !in finishedIds }
+        }
+        downloadDir.listFiles()?.forEach { f -> f.delete() }
+    }
+
     private suspend fun downloadOne(item: MarketItem) {
         val url = item.downloadUrl
         val target = _tasks.value[item.id]?.targetFile ?: return

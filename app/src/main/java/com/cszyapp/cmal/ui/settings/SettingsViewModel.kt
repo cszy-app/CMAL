@@ -28,6 +28,18 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     var checkingUpdate by mutableStateOf(false)
         private set
 
+    var downloadDirSize by mutableStateOf(0L)
+        private set
+
+    init {
+        downloadDirSize = container.downloadManager.downloadDirSize()
+    }
+
+    fun clearDownloads() {
+        container.downloadManager.clearFinishedDownloads()
+        downloadDirSize = container.downloadManager.downloadDirSize()
+    }
+
     fun updateThemeMode(mode: String) {
         themeMode = mode
         container.settingsRepository.themeMode = mode

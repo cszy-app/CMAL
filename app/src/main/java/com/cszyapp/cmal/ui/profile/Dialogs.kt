@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cszyapp.cmal.R
 import com.cszyapp.cmal.data.AppContainer
+import com.cszyapp.cmal.data.download.DownloadManager
 
 /** 主题模式选择对话框 */
 @Composable
@@ -146,6 +147,46 @@ fun BackupDialog(container: AppContainer, onDismiss: () -> Unit) {
         confirmButton = {
             TextButton(onClick = { doBackup() }) {
                 Text(stringResource(R.string.backup_now))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        }
+    )
+}
+
+@Composable
+fun DownloadDialog(
+    sizeBytes: Long,
+    onClear: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.download_manager)) },
+        text = {
+            Column {
+                Text(stringResource(R.string.download_dir_size))
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    if (sizeBytes > 0) "${DownloadManager.sizeString(sizeBytes)}" else stringResource(R.string.empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.download_clear_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onClear()
+                onDismiss()
+            }) {
+                Text(stringResource(R.string.download_clear))
             }
         },
         dismissButton = {

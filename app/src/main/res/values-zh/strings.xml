@@ -105,6 +105,11 @@
     <string name="restore">恢复</string>
     <string name="backup_path">备份位置</string>
 
+    <string name="download_manager">下载管理</string>
+    <string name="download_dir_size">已下载文件</string>
+    <string name="download_clear">清空已完成</string>
+    <string name="download_clear_hint">仅清理已完成的下载，进行中的下载会保留。</string>
+
     <string name="check_update">检查更新</string>
     <string name="up_to_date">已是最新版本</string>
     <string name="update_available">发现新版本</string>
