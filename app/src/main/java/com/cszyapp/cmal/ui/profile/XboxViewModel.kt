@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.cszyapp.cmal.data.AppContainer
 import com.cszyapp.cmal.data.xbox.DeviceCodeInfo
 import com.cszyapp.cmal.data.xbox.XboxAccount
+import com.cszyapp.cmal.data.xbox.XboxAuthException
 import kotlinx.coroutines.launch
 
 /** Xbox 登录 ViewModel */
@@ -41,6 +42,8 @@ class XboxViewModel(private val container: AppContainer) : ViewModel() {
                 container.xboxAuthManager.save(acc)
                 account = acc
                 loggedIn = true
+            } catch (e: XboxAuthException) {
+                error = "Xbox ${e.stage} ${e.errorCode} · ${XboxAuthException.describe(e.errorCode, e.message ?: "登录失败")}"
             } catch (e: Exception) {
                 error = e.message
             } finally {

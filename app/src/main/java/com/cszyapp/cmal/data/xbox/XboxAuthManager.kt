@@ -205,7 +205,10 @@ class XboxAuthManager(private val preferences: Preferences) {
             val body = resp.body?.string() ?: throw IllegalStateException("http_${resp.code}")
             val json = JSONObject(body)
             if (!resp.isSuccessful || !json.has("Token")) {
-                throw IllegalStateException(json.optString("XErr", "xbl_failed_${resp.code}"))
+                throw XboxAuthException(
+                    json.optString("XErr", "xbl_failed_${resp.code}"),
+                    "XBL"
+                )
             }
             return json.getString("Token")
         }
@@ -226,7 +229,10 @@ class XboxAuthManager(private val preferences: Preferences) {
             val body = resp.body?.string() ?: throw IllegalStateException("http_${resp.code}")
             val json = JSONObject(body)
             if (!resp.isSuccessful || !json.has("Token")) {
-                throw IllegalStateException(json.optString("XErr", "xsts_failed_${resp.code}"))
+                throw XboxAuthException(
+                    json.optString("XErr", "xsts_failed_${resp.code}"),
+                    "XSTS"
+                )
             }
             val token = json.getString("Token")
             val xui = json.optJSONObject("DisplayClaims")?.optJSONArray("xui")?.optJSONObject(0)
@@ -243,4 +249,36 @@ class XboxAuthManager(private val preferences: Preferences) {
         val gamertag: String,
         val xuid: String
     )
+}
+
+/**
+ * Xbox 登录异常，携带 XErr 错误码
+ */
+class XboxAuthException(val errorCode: String, val stage: String) :
+    IllegalStateException("Xbox auth failed ($stage): $errorCode") {
+
+    companion object {
+        /** 已知 XErr 错误码 -> 说明 */
+        private val KNOWN_CODES = mapOf(
+            "2148916233" to "Xbox 服务不可用（0x8015DC09），请稍后重试",
+            "2148916238" to "该账号的 Xbox 档案不可用（0x8015DC0E）",
+            "2148916227" to "该账号为未成年/家庭账号，需要家长授权（0x8015DC03）",
+            "2148916228" to "该账号的 Xbox 服务地区不可用（0x8015DC04）",
+            "2148916235" to "该账号无法在您所在地区使用（0x8015DC0B）",
+            "2148916233" to "Xbox 服务暂时不可用（0x8015DC09），请稍后重试",
+            "2148916234" to "需要登录 Microsoft 账户（0x8015DC0A）",
+            "2148916229" to "Xbox 服务需要身份验证（0x8015DC05）",
+            "2148916226" to "该账号无有效的 Microsoft 凭据（0x8015DC02）",
+            "2148916236" to "账号不存在或已被禁用（0x8015DC0C）",
+            "2148916237" to "请检查账户的出生日期设置（0x8015DC0D）",
+            "2148916225" to "Xbox 登录被拒绝，请重试（0x8015DC01）",
+            "2148916224" to "请求失败，请检查网络（0x8015DC00）",
+            "2147957413" to "Xbox 账号已被封禁（0x89235001）",
+            "2147957414" to "Xbox 账号被永久封禁（0x89235002）",
+            "2147957412" to "账号因违反协议被限制（0x89235000）"
+        )
+
+        fun describe(code: String, fallback: String = code): String =
+            KNOWN_CODES[code] ?: fallback
+    }
 }
