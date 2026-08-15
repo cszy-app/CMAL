@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -26,6 +27,7 @@ import com.cszyapp.cmal.CMalApp
 import com.cszyapp.cmal.R
 import com.cszyapp.cmal.ui.home.HomeScreen
 import com.cszyapp.cmal.ui.localapk.LocalApkScreen
+import com.cszyapp.cmal.ui.market.MarketScreen
 import com.cszyapp.cmal.ui.onboarding.OnboardingScreen
 import com.cszyapp.cmal.ui.profile.ProfileScreen
 import com.cszyapp.cmal.ui.resources.ResourcesScreen
@@ -35,6 +37,7 @@ import com.cszyapp.cmal.ui.servers.ServersScreen
 private enum class MainTab(val route: String, val labelRes: Int, val icon: ImageVector) {
     HOME("home", R.string.tab_home, Icons.Filled.Home),
     LOCAL_APK("local_apk", R.string.tab_local_apk, Icons.Filled.InstallMobile),
+    MARKET("market", R.string.tab_market, Icons.Filled.Storefront),
     RESOURCES("resources", R.string.tab_resources, Icons.Filled.Inventory2),
     SERVERS("servers", R.string.tab_servers, Icons.Filled.Public),
     PROFILE("profile", R.string.tab_profile, Icons.Filled.Person),
@@ -111,6 +114,9 @@ private fun MainScaffold() {
             }
             composable(MainTab.LOCAL_APK.route) {
                 LocalApkScreen()
+            }
+            composable(MainTab.MARKET.route) {
+                MarketScreen()
             }
             composable(MainTab.RESOURCES.route) {
                 ResourcesScreen()

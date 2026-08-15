@@ -6,6 +6,7 @@
 
     <string name="tab_home">Home</string>
     <string name="tab_local_apk">Local APK</string>
+    <string name="tab_market">Market</string>
     <string name="tab_resources">Resources</string>
     <string name="tab_servers">Servers</string>
     <string name="tab_profile">Mine</string>
@@ -119,4 +120,14 @@
     <string name="xbox_device_hint">Open the link below on your device or computer, then enter this code:</string>
     <string name="xbox_open_link">Open microsoft.com/link</string>
     <string name="xbox_waiting">Waiting for you to confirm in the browser…</string>
+
+    <string name="market_search_hint">Search Modrinth…</string>
+    <string name="download">Download</string>
+    <string name="market_load_error">Failed to load the market</string>
+    <string name="market_downloaded">Downloaded</string>
+    <string name="market_download_failed">Download failed: %1$s</string>
+    <string name="market_type_mod">Mod</string>
+    <string name="market_type_resourcepack">Resource pack</string>
+    <string name="market_type_shader">Shader</string>
+    <string name="market_type_datapack">Data pack</string>
 </resources>

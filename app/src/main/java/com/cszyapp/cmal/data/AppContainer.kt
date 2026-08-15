@@ -3,7 +3,10 @@ package com.cszyapp.cmal.data
 import android.content.Context
 import com.cszyapp.cmal.CMalApp
 import com.cszyapp.cmal.data.db.AppDatabase
+import com.cszyapp.cmal.data.download.DownloadManager
 import com.cszyapp.cmal.data.install.InstallManager
+import com.cszyapp.cmal.data.market.MarketRepository
+import com.cszyapp.cmal.data.market.ModrinthClient
 import com.cszyapp.cmal.data.repo.ResourcesRepository
 import com.cszyapp.cmal.data.repo.ServersRepository
 import com.cszyapp.cmal.data.repo.SettingsRepository
@@ -43,6 +46,12 @@ class AppContainer(context: Context) {
     val updateChecker: UpdateChecker = UpdateChecker(appContext)
 
     val xboxAuthManager: XboxAuthManager = XboxAuthManager(preferences)
+
+    val modrinthClient: ModrinthClient = ModrinthClient()
+
+    val marketRepository: MarketRepository = MarketRepository(modrinthClient)
+
+    val downloadManager: DownloadManager = DownloadManager(appContext)
 
     companion object {
         /** 便捷获取全局容器 */

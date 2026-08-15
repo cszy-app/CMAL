@@ -6,6 +6,7 @@
 
     <string name="tab_home">首页</string>
     <string name="tab_local_apk">本地APK</string>
+    <string name="tab_market">资源市场</string>
     <string name="tab_resources">资源</string>
     <string name="tab_servers">服务器</string>
     <string name="tab_profile">我的</string>
@@ -119,4 +120,14 @@
     <string name="xbox_device_hint">在手机或电脑上打开下面的链接，然后输入这个代码：</string>
     <string name="xbox_open_link">打开 microsoft.com/link</string>
     <string name="xbox_waiting">正在等待你在浏览器中确认…</string>
+
+    <string name="market_search_hint">搜索 Modrinth…</string>
+    <string name="download">下载</string>
+    <string name="market_load_error">资源市场加载失败</string>
+    <string name="market_downloaded">已下载</string>
+    <string name="market_download_failed">下载失败：%1$s</string>
+    <string name="market_type_mod">模组</string>
+    <string name="market_type_resourcepack">资源包</string>
+    <string name="market_type_shader">光影</string>
+    <string name="market_type_datapack">数据包</string>
 </resources>
