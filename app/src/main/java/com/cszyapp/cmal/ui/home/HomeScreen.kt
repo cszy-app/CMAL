@@ -56,6 +56,17 @@ fun HomeScreen() {
 
     var showAddDialog by remember { mutableStateOf(false) }
 
+    vm.message?.let { msg ->
+        val text = when (msg) {
+            "no_instance" -> stringResource(R.string.no_instance_hint)
+            "not_installed" -> stringResource(R.string.please_install_first)
+            "launch_failed" -> stringResource(R.string.launch_failed)
+            else -> msg
+        }
+        Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+        vm.clearMessage()
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),

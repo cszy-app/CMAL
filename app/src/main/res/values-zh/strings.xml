@@ -84,6 +84,8 @@
     <string name="instances">版本实例</string>
     <string name="add_instance">添加实例</string>
     <string name="instances_empty">还没有实例，点右上角添加已检测到的 Minecraft 版本。</string>
+    <string name="no_instance_hint">请先添加实例</string>
+    <string name="launch_failed">启动 Minecraft 失败</string>
     <string name="no_mc_installed">设备上未检测到 Minecraft 相关包</string>
     <string name="select_instance_hint">选择要添加为实例的已安装版本：</string>
 
