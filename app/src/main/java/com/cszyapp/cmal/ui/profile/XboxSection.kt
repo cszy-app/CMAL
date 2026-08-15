@@ -164,7 +164,6 @@ private fun DeviceCodeDialog(
             } else {
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
             }
-        },
-        onDismissRequest = onDismiss
+        }
     )
 }

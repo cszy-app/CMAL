@@ -56,6 +56,9 @@ fun HomeScreen() {
                     } else {
                         Toast.makeText(context, R.string.please_install_first, Toast.LENGTH_SHORT).show()
                     }
+                },
+                onInstallHint = {
+                    Toast.makeText(context, R.string.install_from_apk, Toast.LENGTH_SHORT).show()
                 }
             )
         }
@@ -66,7 +69,8 @@ fun HomeScreen() {
 private fun PlayCard(
     mcInstalled: Boolean,
     installedVersion: String?,
-    onPlay: () -> Unit
+    onPlay: () -> Unit,
+    onInstallHint: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -117,13 +121,7 @@ private fun PlayCard(
 
             if (!mcInstalled) {
                 Spacer(Modifier.height(8.dp))
-                TextButton(onClick = {
-                    Toast.makeText(
-                        LocalContext.current,
-                        R.string.install_from_apk,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }, modifier = Modifier.fillMaxWidth()) {
+                TextButton(onClick = onInstallHint, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.mc_install))
                 }
             }
