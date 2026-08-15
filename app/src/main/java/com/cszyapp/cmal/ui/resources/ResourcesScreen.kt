@@ -1,5 +1,6 @@
 package com.cszyapp.cmal.ui.resources
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,6 +45,9 @@ import com.cszyapp.cmal.data.db.McResource
 import com.cszyapp.cmal.data.db.McSkin
 import com.cszyapp.cmal.data.db.McWorld
 import com.cszyapp.cmal.ui.navigation.SimpleFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 /** 资源页：资源包 / 皮肤 / 世界 */
@@ -58,7 +62,7 @@ fun ResourcesScreen() {
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
-            kotlinx.coroutines.MainScope().launch {
+            CoroutineScope(Dispatchers.Main).launch {
                 com.cszyapp.cmal.ui.imports.ImportHandler(context, container).handle(it)
             }
         }
@@ -113,7 +117,7 @@ fun ResourcesScreen() {
                         "${context.packageName}.fileprovider",
                         File(r.filePath)
                     )
-                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
                         setDataAndType(uri, "application/octet-stream")
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
