@@ -60,13 +60,12 @@ class McFunClient {
 
     private fun parseItemList(html: String, type: String): List<MarketItem> {
         val result = mutableListOf<MarketItem>()
-        // 抓取第一个 ItemList 的 JSON-LD
-        val blockMatch = Regex(""""@type"\s*:\s*"ItemList".*?\}""").find(html, ignoreCase = false)
-        val block = blockMatch?.value ?: return result
-        // 提取 itemListElement 数组（尽量宽松）
-        val arrStart = block.indexOf("""itemListElement""")
+        // 直接定位 itemListElement 数组
+        val keyIdx = html.indexOf("\"itemListElement\"")
+        if (keyIdx < 0) return result
+        val arrStart = html.indexOf('[', keyIdx)
         if (arrStart < 0) return result
-        val arrJson = extractBalanced(block, arrStart + block.substring(arrStart).indexOf('['))
+        val arrJson = extractBalanced(html, arrStart)
         if (arrJson.isBlank()) return result
         try {
             val array = JSONArray(arrJson)
