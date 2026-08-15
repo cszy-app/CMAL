@@ -174,21 +174,25 @@ class DownloadManager(private val context: Context) {
         }
     }
 
-    private fun buildFileName(item: MarketItem): String {
-        val safe = item.title
-            .replace(Regex("[\\\\/:*?\"<>|]"), "_")
-            .replace(Regex("\\s+"), "_")
-            .take(48)
-            .ifBlank { "download" }
-        val ext = when (item.type) {
-            "world" -> ".mcworld"
-            else -> ".mcpack"
-        }
-        return "$safe$ext"
-    }
+    private fun buildFileName(item: MarketItem): String =
+        buildFileName(item.title, item.type)
 
     companion object {
         private const val MAX_CONCURRENT = 3
+
+        /** 生成安全的下载文件名（纯函数，可单测） */
+        fun buildFileName(title: String, type: String): String {
+            val safe = title
+                .replace(Regex("[\\\\/:*?\"<>|]"), "_")
+                .replace(Regex("\\s+"), "_")
+                .take(48)
+                .ifBlank { "download" }
+            val ext = when (type) {
+                "world" -> ".mcworld"
+                else -> ".mcpack"
+            }
+            return "$safe$ext"
+        }
 
         fun sizeString(bytes: Long): String {
             if (bytes <= 0) return ""
