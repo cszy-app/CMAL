@@ -1,5 +1,6 @@
 package com.cszyapp.cmal.data.xbox
 
+import com.cszyapp.cmal.BuildConfig
 import com.cszyapp.cmal.util.Preferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -69,8 +70,8 @@ data class DeviceCodeInfo(
 class XboxAuthManager(private val preferences: Preferences) {
 
     companion object {
-        // 需要在 Azure 门户注册应用后替换为你的 Client ID
-        const val CLIENT_ID = "YOUR_AZURE_CLIENT_ID"
+        // Client ID 从 local.properties 的 XBOX_CLIENT_ID 注入（BuildConfig），不硬编码
+        const val CLIENT_ID = BuildConfig.XBOX_CLIENT_ID
         const val SCOPE = "XboxLive.signin offline_access"
 
         const val DEVICE_CODE_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode"
