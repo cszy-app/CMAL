@@ -1,7 +1,6 @@
 package com.cszyapp.cmal.data.market
 
 import org.json.JSONArray
-import org.json.JSONObject
 import java.io.IOException
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit

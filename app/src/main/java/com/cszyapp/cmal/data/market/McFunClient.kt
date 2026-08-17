@@ -1,5 +1,7 @@
 package com.cszyapp.cmal.data.market
 
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -175,11 +177,12 @@ class McFunClient {
 
     /** POST JSON，返回 JSONObject */
     private fun postJson(url: String, json: String): JSONObject {
+        val mediaType = "application/json; charset=utf-8".toMediaType()
         val request = okhttp3.Request.Builder()
             .url(url)
             .header("User-Agent", "Mozilla/5.0 (Linux; Android 13) CMAL/0.1")
             .header("Content-Type", "application/json")
-            .post(okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), json))
+            .post(json.toRequestBody(mediaType))
             .build()
         client.newCall(request).execute().use { resp ->
             if (!resp.isSuccessful) throw IOException("mcfun_http_${resp.code}")

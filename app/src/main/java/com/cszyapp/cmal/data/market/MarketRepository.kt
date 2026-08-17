@@ -31,7 +31,7 @@ class MarketRepository(
             try { results += mcpedl.search(query, type, offset, pageSize) } catch (e: Exception) {}
         } else {
             try { results += mcFun.browse(type ?: "mod", offset, pageSize) } catch (e: Exception) {}
-            try { results += mcpedl.browse(type, offset, pageSize) } catch (e: Exception) {}
+            try { results += mcpedl.browse(type ?: "mod", offset, pageSize) } catch (e: Exception) {}
         }
         results
     }
