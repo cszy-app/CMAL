@@ -72,7 +72,8 @@ fun MarketScreen() {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // 搜索�?        Row(verticalAlignment = Alignment.CenterVertically) {
+        // 搜索框
+        Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = vm.query,
                 onValueChange = { vm.updateQuery(it) },
@@ -86,7 +87,8 @@ fun MarketScreen() {
             }
         }
 
-        // 类型筛�?        Row(
+        // 类型筛选
+        Row(
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -245,7 +247,7 @@ private fun MarketItemCard(
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        DownloadManager.sizeString(item.fileSize).ifEmpty { "�? },
+                        DownloadManager.sizeString(item.fileSize).ifEmpty { "—" },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -261,7 +263,7 @@ private fun MarketItemCard(
     }
 }
 
-/** 来源徽标：mcfun �?McFun；mcpedl �?mcpedl */
+/** 来源徽标：mcfun → McFun；mcpedl → mcpedl */
 @Composable
 private fun SourceBadge(source: String) {
     val label = when (source) {
