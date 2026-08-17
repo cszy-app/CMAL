@@ -2,7 +2,7 @@ package com.cszyapp.cmal.data.market
 
 /**
  * 资源中心条目（多源统一模型）
- * source: "modrinth" / "minebbs" / "local"
+ * source: "mcfun" / "mcpedl" / "local"
  */
 data class MarketItem(
     val id: String,
@@ -15,6 +15,6 @@ data class MarketItem(
     val fileSize: Long = 0,
     val version: String? = null,
     val gameVersions: List<String> = emptyList(),
-    val source: String,        // modrinth / minebbs
+    val source: String,        // mcfun / mcpedl
     val webUrl: String? = null
 )

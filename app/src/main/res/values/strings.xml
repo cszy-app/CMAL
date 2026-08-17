@@ -136,7 +136,7 @@
     <string name="xbox_open_link">Open microsoft.com/link</string>
     <string name="xbox_waiting">Waiting for you to confirm in the browser…</string>
 
-    <string name="market_search_hint">Search Modrinth…</string>
+    <string name="market_search_hint">Search resources…</string>
     <string name="download">Download</string>
     <string name="market_load_error">Failed to load the market</string>
     <string name="market_downloaded">Downloaded</string>
@@ -148,5 +148,5 @@
     <string name="market_type_all">All</string>
     <string name="market_type_world">World</string>
     <string name="market_type_modpack">Mod pack</string>
-    <string name="market_open_web">Open in browser</string>
+    <string name="market_required_version">Required version: %1$s+</string>
 </resources>

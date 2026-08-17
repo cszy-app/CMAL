@@ -136,7 +136,7 @@
     <string name="xbox_open_link">打开 microsoft.com/link</string>
     <string name="xbox_waiting">正在等待你在浏览器中确认…</string>
 
-    <string name="market_search_hint">搜索 Modrinth…</string>
+    <string name="market_search_hint">搜索资源…</string>
     <string name="download">下载</string>
     <string name="market_load_error">资源市场加载失败</string>
     <string name="market_downloaded">已下载</string>
@@ -148,5 +148,5 @@
     <string name="market_type_all">全部</string>
     <string name="market_type_world">世界</string>
     <string name="market_type_modpack">整合包</string>
-    <string name="market_open_web">去网盘下载</string>
+    <string name="market_required_version">要求最低版本：%1$s+</string>
 </resources>

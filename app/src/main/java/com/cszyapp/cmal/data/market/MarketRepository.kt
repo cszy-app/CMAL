@@ -5,44 +5,43 @@ import kotlinx.coroutines.withContext
 
 /**
  * 资源市场仓库：聚合多个来源
- * - Modrinth：官方 API，无需 key，支持搜索 + 直连下载
- * - McFun（原 mcshuo）：中文资源站，JSON-LD 解析，按类型浏览，下载走网盘
+ * - McFun（原 mcshuo）：中文基岩版资源站，列表 JSON-LD 解析，下载走官方接口直连
+ * - mcpedl.org：英文 Bedrock 资源站，wp-json 搜索 + 详情页直链
+ *
+ * 下载统一走直连（绕过网盘）；列表按来源聚合，卡片显示来源徽标。
  */
 class MarketRepository(
-    private val modrinth: ModrinthClient,
-    private val mcFun: McFunClient = McFunClient()
+    private val mcFun: McFunClient = McFunClient(),
+    private val mcpedl: McpedlClient = McpedlClient()
 ) {
 
-    /** 搜索资源（Modrinth）。McFun 不支持搜索，仅按类型浏览。 */
+    /**
+     * 统一入口搜索。
+     * - 有搜索词：mcpedl 支持搜索；McFun 无资源搜索 API，跳过
+     * - 无搜索词：两源按类型浏览最新，聚合返回
+     */
     suspend fun search(
         query: String,
         type: String?,
         offset: Int,
         pageSize: Int = 20
     ): List<MarketItem> = withContext(Dispatchers.IO) {
-        try {
-            modrinth.search(query, type, offset, pageSize)
-        } catch (e: Exception) {
-            emptyList()
+        val results = mutableListOf<MarketItem>()
+        if (query.isNotBlank()) {
+            try { results += mcpedl.search(query, type, offset, pageSize) } catch (e: Exception) {}
+        } else {
+            try { results += mcFun.browse(type ?: "mod", offset, pageSize) } catch (e: Exception) {}
+            try { results += mcpedl.browse(type, offset, pageSize) } catch (e: Exception) {}
         }
+        results
     }
 
-    /** 按类型浏览（McFun 中文资源，网盘下载）。用于"发现"页。 */
-    suspend fun browse(type: String, offset: Int, pageSize: Int = 20): List<MarketItem> =
-        withContext(Dispatchers.IO) {
-            try {
-                mcFun.browse(type, offset, pageSize)
-            } catch (e: Exception) {
-                emptyList()
-            }
-        }
-
-    /** 获取具体下载版本信息 */
+    /** 获取具体下载信息（直连 URL、版本） */
     suspend fun resolveDownload(item: MarketItem): MarketItem = withContext(Dispatchers.IO) {
-        if (item.source == "mcfun") {
-            mcFun.getDetail(item) ?: item.copy(downloadUrl = null)
-        } else {
-            modrinth.getVersion(item) ?: item.copy(downloadUrl = null)
+        when (item.source) {
+            "mcfun" -> mcFun.getDetail(item) ?: item.copy(downloadUrl = null)
+            "mcpedl" -> mcpedl.getDetail(item) ?: item.copy(downloadUrl = null)
+            else -> item.copy(downloadUrl = null)
         }
     }
 }

@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -70,20 +71,8 @@ fun MarketScreen() {
         }
     }
 
-    fun openWeb(item: MarketItem) {
-        val url = item.webUrl ?: return
-        try {
-            context.startActivity(
-                android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
-            )
-        } catch (e: Exception) {
-            // 无浏览器时忽略
-        }
-    }
-
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        // 搜索框
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // 搜索�?        Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = vm.query,
                 onValueChange = { vm.updateQuery(it) },
@@ -97,14 +86,13 @@ fun MarketScreen() {
             }
         }
 
-        // 类型筛选
-        Row(
+        // 类型筛�?        Row(
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             val types = listOf("all", "mod", "resourcepack", "shader", "datapack")
             types.forEach { type ->
-                val label = if (type == "all") stringResource(R.string.market_type_all) else ModrinthTypeName(type)
+                val label = if (type == "all") stringResource(R.string.market_type_all) else TypeName(type)
                 FilterChip(
                     selected = vm.selectedType == type,
                     onClick = { vm.setType(type) },
@@ -153,11 +141,9 @@ fun MarketScreen() {
                         MarketItemCard(
                             item = item,
                             task = vm.tasks[item.id],
-                            isWebSource = item.source == "mcfun",
                             onDownload = { vm.downloadAndInstall(item) },
                             onCancel = { vm.cancelDownload(item.id) },
-                            onImport = { importDownloaded(item) },
-                            onOpenWeb = { openWeb(item) }
+                            onImport = { importDownloaded(item) }
                         )
                     }
                 }
@@ -170,11 +156,9 @@ fun MarketScreen() {
 private fun MarketItemCard(
     item: MarketItem,
     task: com.cszyapp.cmal.data.download.DownloadState?,
-    isWebSource: Boolean,
     onDownload: () -> Unit,
     onCancel: () -> Unit,
-    onImport: () -> Unit,
-    onOpenWeb: () -> Unit
+    onImport: () -> Unit
 ) {
     val running = task?.running == true
     val done = task?.done == true
@@ -191,11 +175,15 @@ private fun MarketItemCard(
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(item.title, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(
-                        "${item.author} · ${ModrinthTypeName(item.type)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "${item.author} · ${TypeName(item.type)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        SourceBadge(source = item.source)
+                    }
                     Text(
                         item.description,
                         style = MaterialTheme.typography.bodySmall,
@@ -203,6 +191,14 @@ private fun MarketItemCard(
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    item.version?.let { v ->
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            stringResource(R.string.market_required_version, v),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
 
@@ -249,19 +245,15 @@ private fun MarketItemCard(
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        DownloadManager.sizeString(item.fileSize).ifEmpty { "—" },
+                        DownloadManager.sizeString(item.fileSize).ifEmpty { "�? },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.weight(1f))
-                    Button(onClick = if (isWebSource) onOpenWeb else onDownload, contentPadding = PaddingValues(horizontal = 12.dp)) {
-                        if (isWebSource) {
-                            Text(stringResource(R.string.market_open_web))
-                        } else {
-                            Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text(stringResource(R.string.download))
-                        }
+                    Button(onClick = onDownload, contentPadding = PaddingValues(horizontal = 12.dp)) {
+                        Icon(Icons.Filled.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.download))
                     }
                 }
             }
@@ -269,8 +261,29 @@ private fun MarketItemCard(
     }
 }
 
+/** 来源徽标：mcfun �?McFun；mcpedl �?mcpedl */
 @Composable
-private fun ModrinthTypeName(type: String): String = when (type) {
+private fun SourceBadge(source: String) {
+    val label = when (source) {
+        "mcfun" -> "McFun"
+        "mcpedl" -> "mcpedl"
+        else -> source
+    }
+    Surface(
+        shape = RoundedCornerShape(6.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+        )
+    }
+}
+
+@Composable
+private fun TypeName(type: String): String = when (type) {
     "mod" -> stringResource(R.string.market_type_mod)
     "resourcepack" -> stringResource(R.string.market_type_resourcepack)
     "shader" -> stringResource(R.string.market_type_shader)

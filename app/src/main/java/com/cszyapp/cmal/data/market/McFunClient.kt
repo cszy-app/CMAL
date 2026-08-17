@@ -1,16 +1,18 @@
 package com.cszyapp.cmal.data.market
 
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
  * McFun（原 mcshuo）资源客户端
- * 解析 JSON-LD（schema.org ItemList），无需 API key、无 WAF
+ * - 列表：解析 JSON-LD（schema.org ItemList），无需 API key、无 WAF
+ * - 下载：调官方接口取直连 URL（绕过网盘）
  *
  * 说明：
  * - 支持按类型浏览最新资源（mod / resource_pack / map / modpack）
- * - 下载走网盘（夸克等），无法直连，故提供网盘跳转；详情页可再取 downloadUrl
+ * - 详情接口返回网盘 + "其他下载"（第三方 CDN 直连），应用内直接取直连 URL
  */
 class McFunClient {
 
@@ -42,20 +44,44 @@ class McFunClient {
     }
 
     /**
-     * 获取单个资源详情（含网盘下载地址）。
-     * @return downloadUrl 为网盘链接，非直连；找不到返回 item
+     * 获取单个资源详情（直连下载 URL）。
+     * 调官方下载接口，取非网盘（note != 夸克网盘）的直连链接。
+     * @return 找不到直连返回 item（downloadUrl 为 null）
      */
     fun getDetail(item: MarketItem): MarketItem? {
         val id = item.id.removePrefix("mcfun_")
-        val html = try {
-            fetch("$BASE/resource/$id")
-        } catch (e: IOException) {
-            return item
+        var versions: List<String> = item.gameVersions
+        try {
+            val html = fetch("$BASE/resource/$id")
+            val v = Regex(""""softwareVersion"\s*:\s*(\[[^\]]*\])""").find(html)
+            if (v != null) {
+                val arr = JSONArray(v.groupValues[1])
+                versions = (0 until arr.length()).map { arr.optString(it) }
+            }
+        } catch (e: Exception) {
+            // 版本解析失败不阻塞下载
         }
-        // 详情页 JSON-LD 含 downloadUrl
-        val m = Regex(""""downloadUrl"\s*:\s*"([^"]+)"""").find(html)
-        val dl = m?.groupValues?.get(1)
-        return if (!dl.isNullOrBlank()) item.copy(downloadUrl = dl) else item
+        try {
+            val body = postJson("$BASE/api/v1/resource/$id/download", "{}")
+            val success = body.optBoolean("success", false)
+            if (!success) return item.copy(downloadUrl = null, gameVersions = versions)
+            val links = body.optJSONObject("data")?.optJSONArray("links") ?: return item.copy(downloadUrl = null, gameVersions = versions)
+            var direct: String? = null
+            for (i in 0 until links.length()) {
+                val l = links.optJSONObject(i) ?: continue
+                val url = l.optString("url", "")
+                if (url.isBlank()) continue
+                val note = l.optString("note", "")
+                if (note.contains("网盘") || note.contains("盘")) {
+                    if (direct == null) direct = url   // 兜底：网盘
+                } else {
+                    return item.copy(downloadUrl = url, gameVersions = versions, version = versions.firstOrNull()) // 直连优先
+                }
+            }
+            return item.copy(downloadUrl = direct, gameVersions = versions, version = versions.firstOrNull())
+        } catch (e: Exception) {
+            return item.copy(downloadUrl = null, gameVersions = versions)
+        }
     }
 
     private fun parseItemList(html: String, type: String): List<MarketItem> {
@@ -144,6 +170,20 @@ class McFunClient {
         client.newCall(request).execute().use { resp ->
             if (!resp.isSuccessful) throw IOException("mcfun_http_${resp.code}")
             return resp.body?.string() ?: throw IOException("mcfun_empty")
+        }
+    }
+
+    /** POST JSON，返回 JSONObject */
+    private fun postJson(url: String, json: String): JSONObject {
+        val request = okhttp3.Request.Builder()
+            .url(url)
+            .header("User-Agent", "Mozilla/5.0 (Linux; Android 13) CMAL/0.1")
+            .header("Content-Type", "application/json")
+            .post(okhttp3.RequestBody.create(okhttp3.MediaType.parse("application/json; charset=utf-8"), json))
+            .build()
+        client.newCall(request).execute().use { resp ->
+            if (!resp.isSuccessful) throw IOException("mcfun_http_${resp.code}")
+            return JSONObject(resp.body?.string() ?: "{}")
         }
     }
 }

@@ -32,8 +32,8 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
     var selectedType by mutableStateOf("all")
         private set
 
-    /** 当前来源：modrinth（搜索） / mcfun（浏览） */
-    var source by mutableStateOf("modrinth")
+    /** 当前来源（聚合，暂用于 UI 展示） */
+    var source by mutableStateOf("all")
         private set
 
     var tasks by mutableStateOf<Map<String, DownloadState>>(emptyMap())
@@ -59,15 +59,12 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
             loading = true
             error = null
             try {
-                if (query.isBlank()) {
-                    // 无搜索词：McFun 按类型浏览中文资源（网盘下载）
-                    source = "mcfun"
-                    items = container.marketRepository.browse(selectedType.takeIf { it != "all" } ?: "mod", offset)
-                } else {
-                    // 有搜索词：Modrinth 搜索（直连下载）
-                    source = "modrinth"
-                    items = container.marketRepository.search(query, selectedType.takeIf { it != "all" }, offset)
-                }
+                source = "all"
+                items = container.marketRepository.search(
+                    query,
+                    selectedType.takeIf { it != "all" },
+                    offset
+                )
             } catch (e: Exception) {
                 error = e.message
             } finally {
@@ -76,12 +73,8 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    /** 下载并导入到 Minecraft（仅 Modrinth 直连源；McFun 走网盘浏览器） */
+    /** 下载并导入到 Minecraft（两源均直连） */
     fun downloadAndInstall(item: MarketItem) {
-        if (item.source == "mcfun") {
-            error = "use_web_download"
-            return
-        }
         viewModelScope.launch {
             error = null
             try {
