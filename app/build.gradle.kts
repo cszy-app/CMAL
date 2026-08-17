@@ -16,12 +16,13 @@ val keyStorePassword = env["KEYSTORE_PASSWORD"]
 val keyAlias = env["KEY_ALIAS"]
 val keyPassword = env["KEY_PASSWORD"]
 
-// Xbox 登录 Client ID：从 local.properties 读取（本机密不提交），缺失时用占位符保证可编译
+// Xbox 登录 Client ID：优先读环境变量（CI 通过 GitHub Secret 注入），其次 local.properties（本机构建）
 val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
     if (f.exists()) load(FileInputStream(f))
 }
-val xboxClientId: String = localProps.getProperty("XBOX_CLIENT_ID", "YOUR_AZURE_CLIENT_ID")
+val xboxClientId: String = env["XBOX_CLIENT_ID"]
+    ?: localProps.getProperty("XBOX_CLIENT_ID", "YOUR_AZURE_CLIENT_ID")
 
 var releaseStoreFile: File? = null
 var releaseStorePassword: String? = null

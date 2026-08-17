@@ -39,6 +39,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          XBOX_CLIENT_ID: ${{ secrets.XBOX_CLIENT_ID }}
         run: ./gradlew :app:assembleRelease --stacktrace
 
       - name: Run unit tests
