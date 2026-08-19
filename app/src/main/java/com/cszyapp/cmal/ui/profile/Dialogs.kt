@@ -1,12 +1,19 @@
 package com.cszyapp.cmal.ui.profile
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -19,12 +26,76 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cszyapp.cmal.R
 import com.cszyapp.cmal.data.AppContainer
 import com.cszyapp.cmal.data.download.DownloadManager
+
+/** 可选择的主题色（ARGB Long，与 Preferences.accentColor 一致） */
+val ACCENT_COLORS: List<Long> = listOf(
+    0xFFF5A623L, // 琥珀（默认）
+    0xFFE64A19L, // 橙
+    0xFFE53935L, // 红
+    0xFF43A047L, // 绿
+    0xFF1E88E5L, // 蓝
+    0xFF8E24AAL, // 紫
+    0xFFD81B60L, // 粉
+    0xFF00ACC1L  // 青
+)
+
+/** 主题色选择对话框 */
+@Composable
+fun AccentColorDialog(
+    current: Long,
+    onSelect: (Long) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.choose_theme_color)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    ACCENT_COLORS.take(4).forEach { color ->
+                        ColorSwatch(color = color, selected = current == color, onClick = { onSelect(color) })
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    ACCENT_COLORS.drop(4).forEach { color ->
+                        ColorSwatch(color = color, selected = current == color, onClick = { onSelect(color) })
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) }
+        }
+    )
+}
+
+@Composable
+private fun ColorSwatch(color: Long, selected: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .background(Color(color), CircleShape)
+            .border(
+                width = if (selected) 3.dp else 1.dp,
+                color = if (selected) MaterialTheme.colorScheme.primary else Color.Gray,
+                shape = CircleShape
+            )
+            .clickable(onClick = onClick)
+    )
+}
 
 /** 主题模式选择对话框 */
 @Composable
@@ -113,13 +184,24 @@ fun BackupDialog(container: AppContainer, onDismiss: () -> Unit) {
             dir.mkdirs()
             val stamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
                 .format(java.util.Date())
-            val target = java.io.File(dir, "cmal_backup_$stamp.db")
-            dbFile.copyTo(target, overwrite = true)
-            backupPath = target.absolutePath
+            val base = java.io.File(dir, "cmal_backup_$stamp")
+            base.mkdirs()
+            copyFile(dbFile, java.io.File(base, "cmal.db"))
+            // Room 默认 WAL 模式：活动数据在 -wal/-shm，必须一并备份，否则恢复后数据缺失/损坏
+            listOf("-wal", "-shm").forEach { suffix ->
+                val f = java.io.File(dbFile.absolutePath + suffix)
+                if (f.exists()) copyFile(f, java.io.File(base, "cmal.db$suffix"))
+            }
+            backupPath = base.absolutePath
             Toast.makeText(context, R.string.backup_done, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(context, R.string.backup_fail, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun copyFile(src: java.io.File, dst: java.io.File) {
+        dst.parentFile.mkdirs()
+        src.copyTo(dst, overwrite = true)
     }
 
     AlertDialog(

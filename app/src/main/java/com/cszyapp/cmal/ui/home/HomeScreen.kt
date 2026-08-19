@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
@@ -237,6 +238,14 @@ private fun InstanceCard(
             }
             IconButton(onClick = onPlay) {
                 Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.play))
+            }
+            if (!instance.isDefault) {
+                IconButton(onClick = onSetDefault) {
+                    Icon(Icons.Filled.Star, contentDescription = stringResource(R.string.set_default))
+                }
+            }
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete))
             }
         }
     }

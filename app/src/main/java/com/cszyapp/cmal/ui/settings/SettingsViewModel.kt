@@ -25,6 +25,9 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     var updateInfo by mutableStateOf<String?>(null)
         private set
 
+    var updateFailed by mutableStateOf(false)
+        private set
+
     var checkingUpdate by mutableStateOf(false)
         private set
 
@@ -53,18 +56,30 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     fun updateLanguage(lang: String) {
         language = lang
         container.settingsRepository.language = lang
-        // 简单重启方式：通过重启 Activity 由 MainActivity 处理
+        // 语言切换后由 ProfileScreen 重启 Activity，MainActivity.attachBaseContext 应用 locale
     }
 
     fun checkUpdate() {
         if (checkingUpdate) return
         checkingUpdate = true
+        updateInfo = null
+        updateFailed = false
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
                 container.updateChecker.check()
             }
             checkingUpdate = false
-            updateInfo = result.getOrNull()?.let { "update:${it.versionName}" } ?: "up_to_date"
+            result.onSuccess { info ->
+                updateInfo = if (info != null) "update:${info.versionName}" else "up_to_date"
+            }.onFailure {
+                updateFailed = true
+                updateInfo = "check_failed"
+            }
         }
+    }
+
+    fun clearUpdateInfo() {
+        updateInfo = null
+        updateFailed = false
     }
 }

@@ -1,6 +1,7 @@
 package com.cszyapp.cmal.ui.resources
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -112,16 +113,20 @@ fun ResourcesScreen() {
                 resource = r,
                 onDelete = { vm.deleteResource(r) },
                 onOpen = {
-                    val uri = androidx.core.content.FileProvider.getUriForFile(
-                        context,
-                        "${context.packageName}.fileprovider",
-                        File(r.filePath)
-                    )
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(uri, "application/octet-stream")
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    try {
+                        val uri = androidx.core.content.FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            File(r.filePath)
+                        )
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(uri, "application/octet-stream")
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                    } catch (_: Exception) {
+                        Toast.makeText(context, R.string.open_mc_fail, Toast.LENGTH_SHORT).show()
                     }
-                    context.startActivity(intent)
                 }
             )
         }

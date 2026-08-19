@@ -1,7 +1,11 @@
 package com.cszyapp.cmal.ui.profile
 
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
@@ -34,12 +39,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -187,9 +194,22 @@ private fun SettingsCard() {
     val vm: SettingsViewModel = viewModel(factory = SimpleFactory { SettingsViewModel(container) })
 
     var showThemePicker by remember { mutableStateOf(false) }
+    var showAccent by remember { mutableStateOf(false) }
     var showLanguage by remember { mutableStateOf(false) }
     var showBackup by remember { mutableStateOf(false) }
     var showDownloads by remember { mutableStateOf(false) }
+
+    LaunchedEffect(vm.updateInfo) {
+        vm.updateInfo?.let { info ->
+            val text = when {
+                info.startsWith("update:") -> context.getString(R.string.update_available, info.removePrefix("update:"))
+                info == "up_to_date" -> context.getString(R.string.up_to_date)
+                else -> context.getString(R.string.network_error)
+            }
+            Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+            vm.clearUpdateInfo()
+        }
+    }
 
     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column {
@@ -215,7 +235,15 @@ private fun SettingsCard() {
             SettingRow(
                 icon = Icons.Filled.ColorLens,
                 title = stringResource(R.string.choose_theme_color),
-                onClick = { showThemePicker = true }
+                trailing = {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(Color(vm.accentColor), CircleShape)
+                            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape)
+                    )
+                },
+                onClick = { showAccent = true }
             )
             HorizontalDivider()
             SettingRow(
@@ -270,8 +298,22 @@ private fun SettingsCard() {
             onSelect = { mode ->
                 vm.updateThemeMode(mode)
                 showThemePicker = false
+                // 重新创建 Activity 使主题即时生效（MainActivity 从 SharedPreferences 读取）
+                val activity = context as? android.app.Activity
+                activity?.recreate()
             },
             onDismiss = { showThemePicker = false }
+        )
+    }
+
+    if (showAccent) {
+        AccentColorDialog(
+            current = vm.accentColor,
+            onSelect = { color ->
+                vm.updateAccentColor(color)
+                showAccent = false
+            },
+            onDismiss = { showAccent = false }
         )
     }
 

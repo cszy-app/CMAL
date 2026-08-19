@@ -34,9 +34,7 @@ class ResourcesRepository(private val context: Context) {
         val safeName = File(name).name
         val type = when {
             safeName.endsWith(".mcpack", true) -> "resource"
-            safeName.endsWith(".mcaddon", true) -> "behavior"
-            safeName.endsWith(".mcworld", true) -> "world"
-            else -> "resource"
+            else -> "behavior"
         }
         val target = File(packsDir, safeName)
         resolver.openInputStream(uri)?.use { input ->

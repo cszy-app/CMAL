@@ -78,6 +78,7 @@
     <string name="unsupported_file">无法识别的文件类型</string>
     <string name="imported_ok">已导入：%1$s</string>
     <string name="skin_imported">皮肤已导入</string>
+    <string name="world_imported">世界已导入</string>
     <string name="file_not_found">文件不存在</string>
     <string name="please_install_first">请先安装 Minecraft</string>
 
@@ -120,7 +121,7 @@
 
     <string name="check_update">检查更新</string>
     <string name="up_to_date">已是最新版本</string>
-    <string name="update_available">发现新版本</string>
+    <string name="update_available">发现新版本：%1$s</string>
     <string name="changelog">更新日志</string>
 
     <string name="permission_storage">需要存储权限</string>
@@ -149,4 +150,6 @@
     <string name="market_type_world">世界</string>
     <string name="market_type_modpack">整合包</string>
     <string name="market_required_version">要求最低版本：%1$s+</string>
+    <string name="market_no_download_url">该资源无可用直连下载</string>
+    <string name="set_default">设为默认</string>
 </resources>

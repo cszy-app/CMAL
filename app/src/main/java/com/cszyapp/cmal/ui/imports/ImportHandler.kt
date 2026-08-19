@@ -20,12 +20,33 @@ class ImportHandler(private val context: Context, private val container: AppCont
         val name = queryName(uri) ?: "import_${System.currentTimeMillis()}"
         val lower = name.lowercase()
         when {
-            lower.endsWith(".mcpack") || lower.endsWith(".mcaddon") || lower.endsWith(".mcworld") ->
+            lower.endsWith(".mcworld") ->
+                importWorld(uri, name)
+            lower.endsWith(".mcpack") || lower.endsWith(".mcaddon") ->
                 importPack(uri)
             lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") ->
                 importSkin(uri, name)
             else ->
                 Toast.makeText(context, R.string.unsupported_file, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /** 导入世界（存档）：写入 worlds 表，而非资源表 */
+    private suspend fun importWorld(uri: Uri, name: String) {
+        try {
+            val dir = File(context.getExternalFilesDir(null), "worlds").apply { mkdirs() }
+            val file = File(dir, File(name).name)
+            copyUri(uri, file)
+            container.worldsRepository.add(
+                com.cszyapp.cmal.data.db.McWorld(
+                    name = name.substringBeforeLast('.'),
+                    folderPath = file.absolutePath,
+                    worldSize = file.length()
+                )
+            )
+            Toast.makeText(context, R.string.world_imported, Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(context, R.string.import_fail, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -45,12 +66,29 @@ class ImportHandler(private val context: Context, private val container: AppCont
             val dir = File(context.getExternalFilesDir(null), "skins").apply { mkdirs() }
             val file = File(dir, File(name).name)
             copyUri(uri, file)
+            val (w, h) = pngSize(file) ?: (64 to 64)
             container.skinsRepository.add(
-                com.cszyapp.cmal.data.db.McSkin(name = name, localPath = file.absolutePath)
+                com.cszyapp.cmal.data.db.McSkin(
+                    name = name,
+                    localPath = file.absolutePath,
+                    width = w,
+                    height = h
+                )
             )
             Toast.makeText(context, R.string.skin_imported, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(context, R.string.import_fail, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /** 解析 PNG 实际尺寸，失败返回 null */
+    private fun pngSize(file: File): Pair<Int, Int>? {
+        return try {
+            val opts = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            android.graphics.BitmapFactory.decodeFile(file.absolutePath, opts)
+            if (opts.outWidth > 0 && opts.outHeight > 0) opts.outWidth to opts.outHeight else null
+        } catch (_: Exception) {
+            null
         }
     }
 

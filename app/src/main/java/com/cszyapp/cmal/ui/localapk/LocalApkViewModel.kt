@@ -29,15 +29,22 @@ class LocalApkViewModel(private val container: AppContainer) : ViewModel() {
         if (installing) return
         installing = true
         viewModelScope.launch {
-            val importHandler = ImportHandler(context, container)
-            val file = importHandler.copyUriToFile(uri, "apk_${System.currentTimeMillis()}.apk")
-            if (file != null) {
-                val intent = container.installManager.createInstallIntent(file)
-                context.startActivity(intent)
-            } else {
-                Toast.makeText(context, R.string.apk_read_fail, Toast.LENGTH_SHORT).show()
+            try {
+                val importHandler = ImportHandler(context, container)
+                val file = importHandler.copyUriToFile(uri, "apk_${System.currentTimeMillis()}.apk")
+                if (file != null) {
+                    try {
+                        val intent = container.installManager.createInstallIntent(file)
+                        context.startActivity(intent)
+                    } catch (_: Exception) {
+                        Toast.makeText(context, R.string.install_fail, Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(context, R.string.apk_read_fail, Toast.LENGTH_SHORT).show()
+                }
+            } finally {
+                installing = false
             }
-            installing = false
         }
     }
 }

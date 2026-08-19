@@ -1,5 +1,6 @@
 package com.cszyapp.cmal
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,6 +19,19 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var container: AppContainer
     private lateinit var importHandler: ImportHandler
+
+    /** 语言设置生效：在资源加载前按偏好覆盖 locale（auto/zh/en） */
+    override fun attachBaseContext(newBase: Context) {
+        val lang = CMalApp.of(newBase).preferences.language
+        val locale = when (lang) {
+            "zh" -> java.util.Locale.SIMPLIFIED_CHINESE
+            "en" -> java.util.Locale.ENGLISH
+            else -> java.util.Locale.getDefault()
+        }
+        val config = android.content.res.Configuration(newBase.resources.configuration)
+        config.setLocale(locale)
+        super.attachBaseContext(newBase.createConfigurationContext(config))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

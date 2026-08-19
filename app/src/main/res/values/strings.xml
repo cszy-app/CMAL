@@ -78,6 +78,7 @@
     <string name="unsupported_file">Unsupported file type</string>
     <string name="imported_ok">Imported: %1$s</string>
     <string name="skin_imported">Skin imported</string>
+    <string name="world_imported">World imported</string>
     <string name="file_not_found">File not found</string>
     <string name="please_install_first">Please install Minecraft first</string>
 
@@ -120,7 +121,7 @@
 
     <string name="check_update">Check for updates</string>
     <string name="up_to_date">You are up to date</string>
-    <string name="update_available">New version available</string>
+    <string name="update_available">New version available: %1$s</string>
     <string name="changelog">Changelog</string>
 
     <string name="permission_storage">Storage permission needed</string>
@@ -149,4 +150,6 @@
     <string name="market_type_world">World</string>
     <string name="market_type_modpack">Mod pack</string>
     <string name="market_required_version">Required version: %1$s+</string>
+    <string name="market_no_download_url">No direct download available for this resource</string>
+    <string name="set_default">Set default</string>
 </resources>
