@@ -62,10 +62,10 @@ fun XboxSection() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                if (account != null) Icons.Filled.Person else Icons.Filled.Login,
+                if (vm.loggedIn) Icons.Filled.Person else Icons.Filled.Login,
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
-                tint = if (account != null) MaterialTheme.colorScheme.primary
+                tint = if (vm.loggedIn) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.width(12.dp))
@@ -83,7 +83,7 @@ fun XboxSection() {
             }
             if (vm.loggingIn) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-            } else if (account != null) {
+            } else if (vm.loggedIn) {
                 if (vm.accounts.size > 1) {
                     TextButton(onClick = { showAccounts = true }) {
                         Text(stringResource(R.string.xbox_switch))

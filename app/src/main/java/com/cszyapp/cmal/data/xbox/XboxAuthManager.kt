@@ -191,12 +191,13 @@ class XboxAuthManager(private val preferences: Preferences) {
     }
 
     /**
-     * 第 2 步：轮询等待用户确认，返回 access_token + refresh_token
+     * 第 2 步：轮询等待用户确认，返回 (access_token, refresh_token, expires_in 秒)
      */
-    suspend fun pollForToken(info: DeviceCodeInfo): Pair<String, String> = withContext(Dispatchers.IO) {
+    suspend fun pollForToken(info: DeviceCodeInfo): Triple<String, String, Long> = withContext(Dispatchers.IO) {
         val deadline = System.currentTimeMillis() + info.expiresIn * 1000
         while (System.currentTimeMillis() < deadline) {
-            delay(info.interval * 1000)
+            // 服务器返回 interval 为 0 时兜底 5s，避免忙轮询打爆限流
+            delay(maxOf(info.interval, 5L) * 1000)
             val form = FormBody.Builder()
                 .add("client_id", CLIENT_ID)
                 .add("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
@@ -210,7 +211,11 @@ class XboxAuthManager(private val preferences: Preferences) {
                 val body = resp.body?.string() ?: ""
                 val json = try { JSONObject(body) } catch (_: Exception) { JSONObject() }
                 if (resp.isSuccessful && json.has("access_token")) {
-                    return@withContext json.getString("access_token") to json.optString("refresh_token", "")
+                    return@withContext Triple(
+                        json.getString("access_token"),
+                        json.optString("refresh_token", ""),
+                        json.optLong("expires_in", 3600)
+                    )
                 }
                 val error = json.optString("error")
                 when (error) {
@@ -224,8 +229,9 @@ class XboxAuthManager(private val preferences: Preferences) {
 
     /**
      * 第 3+4 步：access_token -> XBL -> XSTS，得到玩家信息
+     * 正确保存 refresh_token 与真实过期时间，便于后续静默续期
      */
-    suspend fun completeLogin(accessToken: String): XboxAccount = withContext(Dispatchers.IO) {
+    suspend fun completeLogin(accessToken: String, refreshToken: String, expiresInSeconds: Long): XboxAccount = withContext(Dispatchers.IO) {
         val xblToken = exchangeToXbl(accessToken)
         val (xstsToken, uhs, gamertag, xuid) = exchangeToXsts(xblToken)
         XboxAccount(
@@ -233,8 +239,8 @@ class XboxAuthManager(private val preferences: Preferences) {
             xuid = xuid,
             uhs = uhs,
             xstsToken = xstsToken,
-            refreshToken = "",
-            expiresAt = System.currentTimeMillis() + 3600 * 1000
+            refreshToken = refreshToken,
+            expiresAt = System.currentTimeMillis() + expiresInSeconds.coerceIn(60, 86400) * 1000
         )
     }
 

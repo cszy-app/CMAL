@@ -9,6 +9,7 @@ import com.cszyapp.cmal.data.AppContainer
 import com.cszyapp.cmal.data.xbox.DeviceCodeInfo
 import com.cszyapp.cmal.data.xbox.XboxAccount
 import com.cszyapp.cmal.data.xbox.XboxAuthException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /** Xbox 登录 ViewModel（支持多账号切换） */
@@ -32,16 +33,18 @@ class XboxViewModel(private val container: AppContainer) : ViewModel() {
     var error by mutableStateOf<String?>(null)
         private set
 
+    private var loginJob: Job? = null
+
     fun startLogin() {
         if (loggingIn) return
         loggingIn = true
         error = null
-        viewModelScope.launch {
+        loginJob = viewModelScope.launch {
             try {
                 val info = container.xboxAuthManager.requestDeviceCode()
                 deviceCode = info
-                val (accessToken, _) = container.xboxAuthManager.pollForToken(info)
-                val acc = container.xboxAuthManager.completeLogin(accessToken)
+                val (accessToken, refreshToken, expiresIn) = container.xboxAuthManager.pollForToken(info)
+                val acc = container.xboxAuthManager.completeLogin(accessToken, refreshToken, expiresIn)
                 container.xboxAuthManager.save(acc)
                 account = acc
                 accounts = container.xboxAuthManager.allAccounts()
@@ -73,6 +76,9 @@ class XboxViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun cancel() {
+        // 真正取消轮询协程，避免取消后后台轮询继续、再登录时并发轮询互相覆盖
+        loginJob?.cancel()
+        loginJob = null
         loggingIn = false
         deviceCode = null
     }
