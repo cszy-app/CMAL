@@ -177,6 +177,11 @@ fun BackupDialog(container: AppContainer, onDismiss: () -> Unit) {
     val context = LocalContext.current
     var backupPath by remember { mutableStateOf("") }
 
+    fun copyFile(src: java.io.File, dst: java.io.File) {
+        dst.parentFile.mkdirs()
+        src.copyTo(dst, overwrite = true)
+    }
+
     fun doBackup() {
         try {
             val dbFile = java.io.File(context.getDatabasePath("cmal.db").absolutePath)
@@ -197,11 +202,6 @@ fun BackupDialog(container: AppContainer, onDismiss: () -> Unit) {
         } catch (e: Exception) {
             Toast.makeText(context, R.string.backup_fail, Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun copyFile(src: java.io.File, dst: java.io.File) {
-        dst.parentFile.mkdirs()
-        src.copyTo(dst, overwrite = true)
     }
 
     AlertDialog(
