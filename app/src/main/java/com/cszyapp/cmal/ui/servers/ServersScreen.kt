@@ -165,8 +165,8 @@ private fun featuredServers(): List<McServer> = listOf(
         description = "Popular minigame network"
     ),
     McServer(
-        name = "Mineplex",
-        address = "bedrock.mineplex.com",
+        name = "Lifeboat",
+        address = "play.lbsg.net",
         port = 19132,
         featured = true,
         description = "Minigames & classic games"
@@ -174,8 +174,8 @@ private fun featuredServers(): List<McServer> = listOf(
 )
 
 private fun joinServer(context: android.content.Context, server: McServer) {
-    // 通过 Minecraft 的服务器 URL scheme 加入
-    val scheme = "minecraft://connect/?addr=${server.address}&port=${server.port}"
+    // 通过 Minecraft 的服务器 URL scheme 加入（官方参数名为 serverUrl / serverPort）
+    val scheme = "minecraft://connect/?serverUrl=${Uri.encode(server.address)}&serverPort=${server.port}"
     try {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scheme)).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -240,6 +240,7 @@ private fun ServerEditDialog(
     onConfirm: (String, String, Int) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
     var name by remember { mutableStateOf(initial.name) }
     var addr by remember { mutableStateOf(initial.address) }
     var port by remember { mutableStateOf(initial.port.toString()) }
@@ -273,7 +274,12 @@ private fun ServerEditDialog(
         },
         confirmButton = {
             TextButton(onClick = {
-                onConfirm(name.trim(), addr.trim(), port.toIntOrNull() ?: 19132)
+                val p = port.toIntOrNull() ?: 19132
+                if (p !in 1..65535) {
+                    Toast.makeText(context, context.getString(R.string.info_incomplete), Toast.LENGTH_SHORT).show()
+                    return@TextButton
+                }
+                onConfirm(name.trim(), addr.trim(), p)
             }) {
                 Text(stringResource(R.string.save))
             }
