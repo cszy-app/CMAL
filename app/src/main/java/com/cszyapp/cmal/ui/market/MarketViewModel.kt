@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.cszyapp.cmal.data.AppContainer
 import com.cszyapp.cmal.data.download.DownloadState
 import com.cszyapp.cmal.data.market.MarketItem
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -39,6 +40,11 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
     var tasks by mutableStateOf<Map<String, DownloadState>>(emptyMap())
         private set
 
+    var toastMessage by mutableStateOf<String?>(null)
+        private set
+
+    private var searchJob: Job? = null
+
     init {
         viewModelScope.launch {
             container.downloadManager.tasks.collectLatest { tasks = it }
@@ -55,7 +61,9 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun search(offset: Int = 0) {
-        viewModelScope.launch {
+        // 取消上一次搜索，避免快速切类型时后发先至覆盖新结果
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             loading = true
             error = null
             try {
@@ -80,7 +88,7 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
             try {
                 val resolved = container.marketRepository.resolveDownload(item)
                 if (resolved.downloadUrl.isNullOrBlank()) {
-                    error = "no_download_url"
+                    toastMessage = "no_download_url"
                     return@launch
                 }
                 container.downloadManager.startDownload(resolved)
@@ -103,5 +111,9 @@ class MarketViewModel(private val container: AppContainer) : ViewModel() {
 
     fun clearError() {
         error = null
+    }
+
+    fun clearToastMessage() {
+        toastMessage = null
     }
 }

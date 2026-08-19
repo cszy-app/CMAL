@@ -13,7 +13,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -59,20 +61,23 @@ class DownloadManager(private val context: Context) {
 
     private val jobs = mutableMapOf<String, Job>()
     private val semaphore = Semaphore(MAX_CONCURRENT)
+    private val startMutex = Mutex()
 
     private val downloadDir: File
         get() = File(context.getExternalFilesDir(null), "downloads").apply { mkdirs() }
 
     /** 启动下载（多任务并发）。返回 taskId。已存在进行中/已完成任务则复用。 */
     suspend fun startDownload(item: MarketItem): String = withContext(Dispatchers.IO) {
-        val existing = _tasks.value[item.id]
-        if (existing?.running == true || existing?.done == true) return@withContext item.id
-        _tasks.update { it + (item.id to DownloadState(item = item, targetFile = File(downloadDir, buildFileName(item)))) }
-        val id = item.id
-        jobs[id] = scope.launch {
-            semaphore.withPermit { downloadOne(item) }
+        startMutex.withLock {
+            val existing = _tasks.value[item.id]
+            if (existing?.running == true || existing?.done == true) return@withContext item.id
+            // 创建任务即置 running=true，避免快速连点并发写同一文件
+            _tasks.update { it + (item.id to DownloadState(item = item, running = true, targetFile = File(downloadDir, buildFileName(item)))) }
+            jobs[item.id] = scope.launch {
+                semaphore.withPermit { downloadOne(item) }
+            }
+            item.id
         }
-        id
     }
 
     /** 取消某个任务 */
@@ -139,9 +144,13 @@ class DownloadManager(private val context: Context) {
             val request = Request.Builder().url(url).header("User-Agent", "CMAL/0.1").build()
             client.newCall(request).execute().use { resp ->
                 if (!resp.isSuccessful) {
-                    _tasks.update { m ->
-                        m + (item.id to (m[item.id]?.copy(running = false, error = "http_${resp.code}") ?: return@update m))
-                    }
+                    fail(item, "http_${resp.code}", deleteFile = true)
+                    return
+                }
+                // 拦截落地页/HTML：McFun 部分"直连"是 makily.com 的 MCloud 落地页
+                val ct = resp.header("Content-Type").orEmpty().lowercase()
+                if (ct.contains("text/html") || ct.contains("text/plain")) {
+                    fail(item, "invalid_file", deleteFile = true)
                     return
                 }
                 val total = resp.body?.contentLength() ?: 0L
@@ -173,32 +182,44 @@ class DownloadManager(private val context: Context) {
                 m + (item.id to (m[item.id]?.copy(running = false, done = true, downloadedBytes = finalTotal) ?: return@update m))
             }
         } catch (e: CancellationException) {
+            deletePartial(item)
             throw e
         } catch (e: Exception) {
-            _tasks.update { m ->
-                m + (item.id to (m[item.id]?.copy(running = false, error = e.message ?: "download_error") ?: return@update m))
-            }
+            fail(item, e.message ?: "download_error", deleteFile = true)
         }
     }
 
+    /** 置失败状态；deleteFile=true 时清理已写入的部分文件 */
+    private fun fail(item: MarketItem, error: String, deleteFile: Boolean) {
+        if (deleteFile) deletePartial(item)
+        _tasks.update { m ->
+            m + (item.id to (m[item.id]?.copy(running = false, error = error) ?: return@update m))
+        }
+    }
+
+    private fun deletePartial(item: MarketItem) {
+        _tasks.value[item.id]?.targetFile?.delete()
+    }
+
     private fun buildFileName(item: MarketItem): String =
-        buildFileName(item.title, item.type)
+        DownloadManager.buildFileName(item.title, item.type, item.id.hashCode())
 
     companion object {
         private const val MAX_CONCURRENT = 3
 
-        /** 生成安全的下载文件名（纯函数，可单测） */
-        fun buildFileName(title: String, type: String): String {
+        /** 生成安全的下载文件名（纯函数，可单测）。salt 用于避免同名不同资源互相覆盖 */
+        fun buildFileName(title: String, type: String, salt: Int = 0): String {
             val safe = title
                 .replace(Regex("[\\\\/:*?\"<>|]"), "_")
                 .replace(Regex("\\s+"), "_")
                 .take(48)
                 .ifBlank { "download" }
+            val saltPart = if (salt == 0) "" else "_${(salt % 100000).let { if (it < 0) -it else it }}"
             val ext = when (type) {
                 "world" -> ".mcworld"
                 else -> ".mcpack"
             }
-            return "$safe$ext"
+            return "$safe$saltPart$ext"
         }
 
         fun sizeString(bytes: Long): String {

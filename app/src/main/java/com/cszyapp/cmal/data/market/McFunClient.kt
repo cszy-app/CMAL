@@ -33,6 +33,17 @@ class McFunClient {
             "map" to "world",
             "modpack" to "modpack"
         )
+
+        /**
+         * 落地页 / 网盘 / 短链 host 特征。
+         * 实测 McFun "其他下载" 有时指向 makily.com 的 MCloud HTML 落地页（200 text/html），
+         * 下载会得到 HTML 而非资源文件，必须按 host 拦截（note 字段不可靠）。
+         */
+        private val BLOCKED_HOST_HINTS = listOf(
+            "makily", "pan.quark.cn", "pan.baidu.com", "weiyun", "lanzou", "123pan",
+            "aliyundrive", "drive.uc.cn", "cloud.189.cn", "tianyi", "kdocs.cn",
+            "t.cn", "dwz.cn", "url.cn", "jd.com", "s.mcshuo", "mcpan", "mcloud"
+        )
     }
 
     /**
@@ -68,22 +79,27 @@ class McFunClient {
             val success = body.optBoolean("success", false)
             if (!success) return item.copy(downloadUrl = null, gameVersions = versions)
             val links = body.optJSONObject("data")?.optJSONArray("links") ?: return item.copy(downloadUrl = null, gameVersions = versions)
-            var direct: String? = null
             for (i in 0 until links.length()) {
                 val l = links.optJSONObject(i) ?: continue
-                val url = l.optString("url", "")
+                val url = l.optString("url", "").trim()
                 if (url.isBlank()) continue
                 val note = l.optString("note", "")
-                if (note.contains("网盘") || note.contains("盘")) {
-                    if (direct == null) direct = url   // 兜底：网盘
-                } else {
-                    return item.copy(downloadUrl = url, gameVersions = versions, version = versions.firstOrNull()) // 直连优先
-                }
+                if (note.contains("网盘") || note.contains("盘")) continue
+                if (!isDirectHost(url)) continue
+                return item.copy(downloadUrl = url, gameVersions = versions, version = versions.firstOrNull())
             }
-            return item.copy(downloadUrl = direct, gameVersions = versions, version = versions.firstOrNull())
+            return item.copy(downloadUrl = null, gameVersions = versions)
         } catch (e: Exception) {
             return item.copy(downloadUrl = null, gameVersions = versions)
         }
+    }
+
+    /** 仅接受可直连下载的 http(s) 链接，拦截落地页/网盘/短链 host */
+    private fun isDirectHost(url: String): Boolean {
+        if (!url.startsWith("http://") && !url.startsWith("https://")) return false
+        val host = try { java.net.URI(url).host?.lowercase() ?: "" } catch (e: Exception) { "" }
+        if (host.isBlank()) return false
+        return BLOCKED_HOST_HINTS.none { host.contains(it) }
     }
 
     private fun parseItemList(html: String, type: String): List<MarketItem> {

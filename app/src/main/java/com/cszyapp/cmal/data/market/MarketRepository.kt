@@ -30,10 +30,14 @@ class MarketRepository(
         if (query.isNotBlank()) {
             try { results += mcpedl.search(query, type, offset, pageSize) } catch (e: Exception) {}
         } else {
-            try { results += mcFun.browse(type ?: "mod", offset, pageSize) } catch (e: Exception) {}
-            try { results += mcpedl.browse(type ?: "mod", offset, pageSize) } catch (e: Exception) {}
+            // type 为空（"全部"）时浏览两源支持的全部类型，否则只浏览指定类型
+            val types = if (type.isNullOrBlank()) listOf("mod", "resourcepack", "world", "shader", "datapack", "modpack") else listOf(type)
+            for (t in types) {
+                try { results += mcFun.browse(t, offset, pageSize) } catch (e: Exception) {}
+                try { results += mcpedl.browse(t, offset, pageSize) } catch (e: Exception) {}
+            }
         }
-        results
+        results.distinctBy { it.id }
     }
 
     /** 获取具体下载信息（直连 URL、版本） */

@@ -1,5 +1,6 @@
 package com.cszyapp.cmal.ui.market
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
@@ -33,12 +36,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -67,7 +72,19 @@ fun MarketScreen() {
         )
         scope.launch {
             com.cszyapp.cmal.ui.imports.ImportHandler(context, container).handle(uri)
+            file.delete()
             vm.removeTask(item.id)
+        }
+    }
+
+    vm.toastMessage?.let { msg ->
+        LaunchedEffect(msg) {
+            val text = when (msg) {
+                "no_download_url" -> context.getString(R.string.market_no_download_url)
+                else -> msg
+            }
+            Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+            vm.clearToastMessage()
         }
     }
 
@@ -79,7 +96,9 @@ fun MarketScreen() {
                 onValueChange = { vm.updateQuery(it) },
                 modifier = Modifier.weight(1f),
                 placeholder = { Text(stringResource(R.string.market_search_hint)) },
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { vm.search(0) })
             )
             Spacer(Modifier.width(8.dp))
             IconButton(onClick = { vm.search(0) }) {
@@ -92,7 +111,7 @@ fun MarketScreen() {
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val types = listOf("all", "mod", "resourcepack", "shader", "datapack")
+            val types = listOf("all", "mod", "resourcepack", "shader", "datapack", "world")
             types.forEach { type ->
                 val label = if (type == "all") stringResource(R.string.market_type_all) else TypeName(type)
                 FilterChip(
