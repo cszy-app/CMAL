@@ -29,8 +29,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun instanceDao(): InstanceDao
 
     /** 关闭数据库连接（恢复备份前调用，配合进程重启让 Room 重新加载） */
-    fun close() {
-        INSTANCE?.close()
+    override fun close() {
+        super.close()
         INSTANCE = null
     }
 

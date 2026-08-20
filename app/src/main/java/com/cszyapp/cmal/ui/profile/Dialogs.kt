@@ -231,7 +231,7 @@ fun BackupDialog(container: AppContainer, onDismiss: () -> Unit) {
         scope.launch(Dispatchers.IO) {
             try {
                 // 先关闭 Room 连接，再覆盖文件，最后重启进程让 Room 从恢复的文件重新加载
-                com.cszyapp.cmal.data.db.AppDatabase.close()
+                com.cszyapp.cmal.data.db.AppDatabase.get(context).close()
                 val dbFile = java.io.File(context.getDatabasePath("cmal.db").absolutePath)
                 copyFile(java.io.File(backup, "cmal.db"), dbFile)
                 listOf("-wal", "-shm").forEach { suffix ->
