@@ -34,12 +34,20 @@ class ImportHandler(private val context: Context, private val container: AppCont
     /** 导入世界（存档）：写入 worlds 表，而非资源表 */
     private suspend fun importWorld(uri: Uri, name: String) {
         try {
+            val size = contentUriLength(uri)
+            val baseName = name.substringBeforeLast('.')
+            val existing = container.worldsRepository.findByName(baseName)
+            existing.firstOrNull { File(it.folderPath).length() == size }?.let {
+                Toast.makeText(context, R.string.already_imported, Toast.LENGTH_SHORT).show()
+                return
+            }
+            existing.forEach { container.worldsRepository.delete(it) }
             val dir = File(context.getExternalFilesDir(null), "worlds").apply { mkdirs() }
             val file = File(dir, File(name).name)
             copyUri(uri, file)
             container.worldsRepository.add(
                 com.cszyapp.cmal.data.db.McWorld(
-                    name = name.substringBeforeLast('.'),
+                    name = baseName,
                     folderPath = file.absolutePath,
                     worldSize = file.length()
                 )
@@ -63,6 +71,13 @@ class ImportHandler(private val context: Context, private val container: AppCont
     /** 导入皮肤 */
     private suspend fun importSkin(uri: Uri, name: String) {
         try {
+            val size = contentUriLength(uri)
+            val existing = container.skinsRepository.findByName(name)
+            existing.firstOrNull { File(it.localPath).length() == size }?.let {
+                Toast.makeText(context, R.string.already_imported, Toast.LENGTH_SHORT).show()
+                return
+            }
+            existing.forEach { container.skinsRepository.delete(it) }
             val dir = File(context.getExternalFilesDir(null), "skins").apply { mkdirs() }
             val file = File(dir, File(name).name)
             copyUri(uri, file)
@@ -78,6 +93,15 @@ class ImportHandler(private val context: Context, private val container: AppCont
             Toast.makeText(context, R.string.skin_imported, Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(context, R.string.import_fail, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /** 读取 Uri 源数据字节数 */
+    private fun contentUriLength(uri: Uri): Long {
+        return try {
+            context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length } ?: 0L
+        } catch (_: Exception) {
+            0L
         }
     }
 

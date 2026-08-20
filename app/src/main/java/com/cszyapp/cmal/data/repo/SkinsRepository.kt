@@ -9,6 +9,8 @@ class SkinsRepository(private val database: AppDatabase) {
 
     fun observeAll(): Flow<List<McSkin>> = database.skinDao().observeAll()
 
+    suspend fun findByName(name: String): List<McSkin> = database.skinDao().getByName(name)
+
     suspend fun add(skin: McSkin): Long = database.skinDao().upsert(skin)
 
     suspend fun delete(skin: McSkin) {

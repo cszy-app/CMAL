@@ -36,18 +36,36 @@ class ResourcesRepository(private val context: Context) {
             safeName.endsWith(".mcpack", true) -> "resource"
             else -> "behavior"
         }
+        val baseName = safeName.substringBeforeLast('.')
+        val incomingSize = uriLength(resolver, uri)
+        val existing = database.resourceDao().getByName(baseName)
+        // 同名且大小一致的已导入资源 → 复用记录，避免重复导入
+        existing.firstOrNull { it.type == type && File(it.filePath).length() == incomingSize }?.let {
+            return@withContext it
+        }
+        // 同名但内容不同 → 清掉旧记录（同路径文件将被覆盖），保证同名只留一条
+        existing.forEach { database.resourceDao().delete(it) }
         val target = File(packsDir, safeName)
         resolver.openInputStream(uri)?.use { input ->
             FileOutputStream(target).use { output -> input.copyTo(output) }
         } ?: throw IllegalStateException("cannot_open_uri")
 
         val resource = McResource(
-            name = safeName.substringBeforeLast('.'),
+            name = baseName,
             type = type,
             filePath = target.absolutePath
         )
         database.resourceDao().upsert(resource)
         resource
+    }
+
+    /** 取 content Uri 对应字节数（读取前先比较，避免无谓复制） */
+    private fun uriLength(resolver: ContentResolver, uri: Uri): Long {
+        return try {
+            resolver.openAssetFileDescriptor(uri, "r")?.use { it.length } ?: 0L
+        } catch (_: Exception) {
+            0L
+        }
     }
 
     suspend fun delete(resource: McResource) {

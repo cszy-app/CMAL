@@ -25,6 +25,9 @@ interface SkinDao {
     @Query("SELECT * FROM skins ORDER BY addedAt DESC")
     fun observeAll(): Flow<List<McSkin>>
 
+    @Query("SELECT * FROM skins WHERE name = :name")
+    suspend fun getByName(name: String): List<McSkin>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(skin: McSkin): Long
 
@@ -37,6 +40,9 @@ interface WorldDao {
     @Query("SELECT * FROM worlds ORDER BY importedAt DESC")
     fun observeAll(): Flow<List<McWorld>>
 
+    @Query("SELECT * FROM worlds WHERE name = :name")
+    suspend fun getByName(name: String): List<McWorld>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(world: McWorld): Long
 
@@ -48,6 +54,9 @@ interface WorldDao {
 interface ResourceDao {
     @Query("SELECT * FROM resources ORDER BY importedAt DESC")
     fun observeAll(): Flow<List<McResource>>
+
+    @Query("SELECT * FROM resources WHERE name = :name")
+    suspend fun getByName(name: String): List<McResource>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(resource: McResource): Long

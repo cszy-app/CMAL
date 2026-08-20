@@ -9,6 +9,8 @@ class WorldsRepository(private val database: AppDatabase) {
 
     fun observeAll(): Flow<List<McWorld>> = database.worldDao().observeAll()
 
+    suspend fun findByName(name: String): List<McWorld> = database.worldDao().getByName(name)
+
     suspend fun add(world: McWorld): Long = database.worldDao().upsert(world)
 
     suspend fun delete(world: McWorld) {
