@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +37,9 @@ import androidx.compose.ui.unit.dp
 import com.cszyapp.cmal.R
 import com.cszyapp.cmal.data.AppContainer
 import com.cszyapp.cmal.data.download.DownloadManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** 可选择的主题色（ARGB Long，与 Preferences.accentColor 一致） */
 val ACCENT_COLORS: List<Long> = listOf(
@@ -175,66 +182,182 @@ fun LanguageDialog(
 @Composable
 fun BackupDialog(container: AppContainer, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    var backupPath by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+    var backups by remember { mutableStateOf(listBackups(context)) }
+    var selectedPath by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var confirmRestore by remember { mutableStateOf(false) }
 
-    fun copyFile(src: java.io.File, dst: java.io.File) {
-        dst.parentFile.mkdirs()
-        src.copyTo(dst, overwrite = true)
+    fun refresh() {
+        backups = listBackups(context)
+        if (backups.none { it.absolutePath == selectedPath }) selectedPath = null
     }
 
     fun doBackup() {
-        try {
-            val dbFile = java.io.File(context.getDatabasePath("cmal.db").absolutePath)
-            val dir = java.io.File(context.getExternalFilesDir(null), "backups")
-            dir.mkdirs()
-            val stamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
-                .format(java.util.Date())
-            val base = java.io.File(dir, "cmal_backup_$stamp")
-            base.mkdirs()
-            copyFile(dbFile, java.io.File(base, "cmal.db"))
-            // Room 默认 WAL 模式：活动数据在 -wal/-shm，必须一并备份，否则恢复后数据缺失/损坏
-            listOf("-wal", "-shm").forEach { suffix ->
-                val f = java.io.File(dbFile.absolutePath + suffix)
-                if (f.exists()) copyFile(f, java.io.File(base, "cmal.db$suffix"))
+        if (busy) return
+        busy = true
+        scope.launch(Dispatchers.IO) {
+            try {
+                val dbFile = java.io.File(context.getDatabasePath("cmal.db").absolutePath)
+                val dir = java.io.File(context.getExternalFilesDir(null), "backups")
+                dir.mkdirs()
+                val stamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US)
+                    .format(java.util.Date())
+                val base = java.io.File(dir, "cmal_backup_$stamp")
+                base.mkdirs()
+                copyFile(dbFile, java.io.File(base, "cmal.db"))
+                // Room 默认 WAL 模式：活动数据在 -wal/-shm，必须一并备份，否则恢复后数据缺失/损坏
+                listOf("-wal", "-shm").forEach { suffix ->
+                    val f = java.io.File(dbFile.absolutePath + suffix)
+                    if (f.exists()) copyFile(f, java.io.File(base, "cmal.db$suffix"))
+                }
+                withContext(Dispatchers.Main) {
+                    refresh()
+                    selectedPath = base.absolutePath
+                    Toast.makeText(context, R.string.backup_done, Toast.LENGTH_SHORT).show()
+                    busy = false
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, R.string.backup_fail, Toast.LENGTH_SHORT).show()
+                    busy = false
+                }
             }
-            backupPath = base.absolutePath
-            Toast.makeText(context, R.string.backup_done, Toast.LENGTH_SHORT).show()
-        } catch (e: Exception) {
-            Toast.makeText(context, R.string.backup_fail, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun doRestore(backup: java.io.File) {
+        busy = true
+        scope.launch(Dispatchers.IO) {
+            try {
+                // 先关闭 Room 连接，再覆盖文件，最后重启进程让 Room 从恢复的文件重新加载
+                com.cszyapp.cmal.data.db.AppDatabase.close()
+                val dbFile = java.io.File(context.getDatabasePath("cmal.db").absolutePath)
+                copyFile(java.io.File(backup, "cmal.db"), dbFile)
+                listOf("-wal", "-shm").forEach { suffix ->
+                    val src = java.io.File(backup, "cmal.db$suffix")
+                    val dst = java.io.File(dbFile.absolutePath + suffix)
+                    if (src.exists()) copyFile(src, dst) else dst.delete()
+                }
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, R.string.restore_done, Toast.LENGTH_SHORT).show()
+                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                    if (intent != null) {
+                        context.startActivity(android.content.Intent.makeRestartActivityTask(intent.component))
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                    } else {
+                        busy = false
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, R.string.restore_fail, Toast.LENGTH_SHORT).show()
+                    busy = false
+                }
+            }
         }
     }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { if (!busy) onDismiss() },
         title = { Text(stringResource(R.string.backup_restore)) },
         text = {
             Column {
-                Text(stringResource(R.string.backup_path))
+                Text(
+                    stringResource(R.string.backup_list),
+                    style = MaterialTheme.typography.labelLarge
+                )
                 Spacer(Modifier.height(8.dp))
-                if (backupPath.isNotBlank()) {
+                if (backups.isEmpty()) {
                     Text(
-                        backupPath,
+                        stringResource(R.string.no_backup_found),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
-                    Text(
-                        "…",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    LazyColumn(modifier = Modifier.weight(1f, fill = false).heightIn(max = 240.dp)) {
+                        items(backups, key = { it.absolutePath }) { b ->
+                            val selected = b.absolutePath == selectedPath
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { selectedPath = b.absolutePath }
+                                    .padding(vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(selected = selected, onClick = { selectedPath = b.absolutePath })
+                                Column {
+                                    Text(
+                                        b.name.removePrefix("cmal_backup_"),
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        DownloadManager.sizeString(b.listFiles()?.sumOf { it.length() } ?: 0L),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = { doBackup() }) {
-                Text(stringResource(R.string.backup_now))
+            if (busy) {
+                Text(stringResource(R.string.working))
+            } else {
+                TextButton(onClick = {
+                    if (backups.any { it.absolutePath == selectedPath }) confirmRestore = true
+                }) {
+                    Text(stringResource(R.string.restore))
+                }
+                TextButton(onClick = { doBackup() }) {
+                    Text(stringResource(R.string.backup_now))
+                }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
+
+    if (confirmRestore) {
+        val target = backups.firstOrNull { it.absolutePath == selectedPath }
+        if (target != null) {
+            AlertDialog(
+                onDismissRequest = { confirmRestore = false },
+                title = { Text(stringResource(R.string.restore)) },
+                text = { Text(stringResource(R.string.restore_confirm)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        confirmRestore = false
+                        doRestore(target)
+                    }) {
+                        Text(stringResource(R.string.restore))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { confirmRestore = false }) { Text(stringResource(R.string.cancel)) }
+                }
+            )
+        }
+    }
+}
+
+/** 列出备份目录中的备份（按时间倒序），仅含完整 .db 的目录 */
+private fun listBackups(context: android.content.Context): List<java.io.File> {
+    val dir = java.io.File(context.getExternalFilesDir(null), "backups")
+    if (!dir.exists()) return emptyList()
+    return dir.listFiles()
+        ?.filter { it.isDirectory && java.io.File(it, "cmal.db").exists() }
+        ?.sortedByDescending { it.lastModified() }
+        ?: emptyList()
+}
+
+private fun copyFile(src: java.io.File, dst: java.io.File) {
+    dst.parentFile?.mkdirs()
+    src.copyTo(dst, overwrite = true)
 }
 
 @Composable

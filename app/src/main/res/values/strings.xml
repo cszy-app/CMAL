@@ -74,6 +74,13 @@
     <string name="open_mc_fail">Cannot open Minecraft</string>
     <string name="backup_done">Backup completed</string>
     <string name="backup_fail">Backup failed</string>
+    <string name="backup_list">Existing backups</string>
+    <string name="no_backup_found">No backups found yet</string>
+    <string name="restore_confirm">Restore this backup? Current data will be overwritten and the app will restart.</string>
+    <string name="restore_done">Restore completed, restarting…</string>
+    <string name="restore_fail">Restore failed</string>
+    <string name="working">Working…</string>
+    <string name="already_imported">Already imported</string>
     <string name="cannot_open_mc">Cannot open Minecraft</string>
     <string name="unsupported_file">Unsupported file type</string>
     <string name="imported_ok">Imported: %1$s</string>

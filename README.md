@@ -14,14 +14,15 @@
 
 - 🚀 **官方版安装 + 一键启动**：从本地 APK 安装官方 Minecraft Bedrock，标准流程安装后直接启动
 - 🧍 **Xbox 登录**：内置 Microsoft 账户授权（设备码流），登录后管理 Xbox 账户
-- 🎨 **资源包 / 行为包**：导入 `.mcpack` / `.mcaddon` / `.mcworld`
-- 🧍 **皮肤管理**：本地皮肤 + 联网皮肤库
-- 🌍 **世界管理**：存档浏览、导入、导出、删除
-- 🖥 **服务器列表**：自定义服务器 + 内置精选服务器，一键加入
-- 💾 **备份 / 恢复**：数据库一键备份
+- 🛒 **资源市场**：浏览 / 搜索 McFun 与 mcpedl 在线资源，直连下载并一键导入
+- 🎨 **资源包 / 行为包 / 世界**：导入 `.mcpack` / `.mcaddon` / `.mcworld`，世界单独归档
+- 🧍 **皮肤管理**：本地皮肤导入（自动识别尺寸）+ 市场皮肤
+- 🌍 **世界管理**：存档导入、浏览、删除
+- 🖥 **服务器列表**：自定义 + 内置精选服务器，`minecraft://` 深链一键加入
+- 💾 **备份 / 恢复**：数据库一键备份与恢复（含 WAL，恢复后自动重启生效）
 - 🔄 **应用自更新**：GitHub Releases 检查更新
-- 🌐 **中英双语**：跟随系统 / 手动切换
-- 🎨 **Material 3**：动态取色 + 自定义主题色
+- 🌐 **中英双语**：跟随系统 / 手动切换（即时生效）
+- 🎨 **Material 3**：明 / 暗主题 + 自定义主题色
 
 ## 界面语言
 
@@ -134,7 +135,11 @@ CMAL **不分发 Minecraft APK**。请从官方渠道（如 Google Play）购买
 CMAL 使用 Microsoft OAuth 设备码流登录 Xbox：
 
 1. 在 [Azure 门户](https://portal.azure.com/) 注册一个应用，开启「允许公共客户端流」
-2. 将应用的 **Client ID** 填入 `app/src/main/java/com/cszyapp/cmal/data/xbox/XboxAuthManager.kt` 的 `CLIENT_ID` 常量
+2. 将应用的 **Client ID** 写入项目根目录 `local.properties`：
+   ```properties
+   XBOX_CLIENT_ID=你的ClientID
+   ```
+   CI 云端构建改为在 GitHub Actions 的 **Secrets and variables → Actions** 配置同名 `XBOX_CLIENT_ID` Secret 注入。
 3. 在应用「我的」页点击 Xbox 登录，按提示在浏览器中确认即可
 
 ## 版权与免责声明

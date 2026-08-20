@@ -74,6 +74,13 @@
     <string name="open_mc_fail">无法打开 Minecraft</string>
     <string name="backup_done">备份完成</string>
     <string name="backup_fail">备份失败</string>
+    <string name="backup_list">已有备份</string>
+    <string name="no_backup_found">暂无备份</string>
+    <string name="restore_confirm">确定恢复该备份？当前数据将被覆盖，应用将重启。</string>
+    <string name="restore_done">恢复完成，正在重启…</string>
+    <string name="restore_fail">恢复失败</string>
+    <string name="working">处理中…</string>
+    <string name="already_imported">该文件已导入</string>
     <string name="cannot_open_mc">无法打开 Minecraft</string>
     <string name="unsupported_file">无法识别的文件类型</string>
     <string name="imported_ok">已导入：%1$s</string>
