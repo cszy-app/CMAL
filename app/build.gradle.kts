@@ -60,8 +60,8 @@ android {
         applicationId = "com.cszyapp.cmal"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1-beta"
+        versionCode = 2
+        versionName = "0.2-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
