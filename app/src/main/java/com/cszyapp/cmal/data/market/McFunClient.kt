@@ -86,7 +86,7 @@ class McFunClient {
                 val note = l.optString("note", "")
                 if (note.contains("网盘") || note.contains("盘")) continue
                 if (!isDirectHost(url)) continue
-                return item.copy(downloadUrl = url, gameVersions = versions, version = versions.firstOrNull())
+                return item.copy(downloadUrl = url, gameVersions = versions, version = versions.firstOrNull(), fileSize = probeSize(url))
             }
             return item.copy(downloadUrl = null, gameVersions = versions)
         } catch (e: Exception) {
@@ -100,6 +100,30 @@ class McFunClient {
         val host = try { java.net.URI(url).host?.lowercase() ?: "" } catch (e: Exception) { "" }
         if (host.isBlank()) return false
         return BLOCKED_HOST_HINTS.none { host.contains(it) }
+    }
+
+    /** 探测直连文件大小（HEAD，被拒时退化为 Range=0-0 读 Content-Range） */
+    private fun probeSize(url: String): Long {
+        try {
+            val head = okhttp3.Request.Builder().url(url)
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 13) CMAL/0.1")
+                .head()
+                .build()
+            client.newCall(head).execute().use { resp ->
+                val cl = resp.body?.contentLength() ?: 0L
+                if (cl > 0) return cl
+            }
+            val range = okhttp3.Request.Builder().url(url)
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 13) CMAL/0.1")
+                .header("Range", "bytes=0-0")
+                .build()
+            client.newCall(range).execute().use { resp ->
+                val total = resp.header("Content-Range")?.substringAfter("/")?.toLongOrNull() ?: 0L
+                if (total > 0) return total
+            }
+        } catch (_: Exception) {
+        }
+        return 0L
     }
 
     private fun parseItemList(html: String, type: String): List<MarketItem> {

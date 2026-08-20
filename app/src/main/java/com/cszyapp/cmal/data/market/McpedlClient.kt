@@ -67,7 +67,7 @@ class McpedlClient {
         ).find(detailHtml)?.groupValues?.get(2)
         val versions = parseVersionRange(versionRange)
         val direct = fetchGetFile(form) ?: return item.copy(downloadUrl = null, gameVersions = versions)
-        return item.copy(downloadUrl = direct, gameVersions = versions, version = versions.firstOrNull())
+        return item.copy(downloadUrl = direct, gameVersions = versions, version = versions.firstOrNull(), fileSize = probeSize(direct))
     }
 
     /** POST /getfile/{id} → 解析内嵌直链 window.location.href='...' */
@@ -88,6 +88,30 @@ class McpedlClient {
         if (raw.isNullOrBlank()) return emptyList()
         val parts = raw.split(Regex("""[\s–—~-]+""")).filter { it.matches(Regex("""\d+(\.\d+){0,3}""")) }
         return parts
+    }
+
+    /** 探测直连文件大小（HEAD，被拒时退化为 Range=0-0 读 Content-Range） */
+    private fun probeSize(url: String): Long {
+        try {
+            val head = okhttp3.Request.Builder().url(url)
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 13) CMAL/0.1")
+                .head()
+                .build()
+            client.newCall(head).execute().use { resp ->
+                val cl = resp.body?.contentLength() ?: 0L
+                if (cl > 0) return cl
+            }
+            val range = okhttp3.Request.Builder().url(url)
+                .header("User-Agent", "Mozilla/5.0 (Linux; Android 13) CMAL/0.1")
+                .header("Range", "bytes=0-0")
+                .build()
+            client.newCall(range).execute().use { resp ->
+                val total = resp.header("Content-Range")?.substringAfter("/")?.toLongOrNull() ?: 0L
+                if (total > 0) return total
+            }
+        } catch (_: Exception) {
+        }
+        return 0L
     }
 
     private fun parsePosts(json: String, type: String?): List<MarketItem> {
